@@ -15,6 +15,7 @@ Next.js
 ### Starting Medusa Backend
 ```
 cd lula-ecommerce-store
+npm install
 npx @medusajs/medusa-cli develop
 ```
 
@@ -25,6 +26,7 @@ npx @medusajs/medusa-cli develop
 ### Starting Next.js Storefront
 ```
 cd lula-ecommerce-store-storefront
+npm install
 npm run dev
 ```
 
