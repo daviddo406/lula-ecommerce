@@ -15,11 +15,7 @@ Next.js
 ### Database Set-up (REQUIRED)
 Login as postgres user:
 ```
-#windows
 psql -U postgres
-
-#mac
-psql postgres
 ```
 
 Create a database as postgres user, named medusa-nuSM:
