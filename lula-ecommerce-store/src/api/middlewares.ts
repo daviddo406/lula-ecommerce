@@ -6,6 +6,7 @@ import type {
   } from "@medusajs/medusa";
 import NodeCache from "node-cache";
 import axios from"axios";
+import cors from "cors";
 
 const authCache = new NodeCache({stdTTL: 2592000});
 
@@ -32,8 +33,17 @@ async function authToken(
 export const config: MiddlewaresConfig = {
     routes: [
         {
-        matcher: "/uber/*",
-        middlewares: [authToken],
+            matcher: "/uber/*",
+            middlewares: [authToken],
         },
+        {
+            matcher:"/*",
+            middlewares: [
+                cors({
+                    origin: "*",
+                    credentials: true
+                })
+            ],
+        }
     ],
 };
