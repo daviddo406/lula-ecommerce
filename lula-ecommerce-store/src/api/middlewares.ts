@@ -34,10 +34,16 @@ export const config: MiddlewaresConfig = {
     routes: [
         {
             matcher: "/uber/*",
-            middlewares: [authToken],
+            middlewares: [
+                authToken,
+                cors({
+                    origin: "*",
+                    credentials: true
+                })
+            ],
         },
         {
-            matcher:"/*",
+            matcher:"/doordash/*",
             middlewares: [
                 cors({
                     origin: "*",
