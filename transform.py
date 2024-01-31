@@ -122,7 +122,9 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
 
             ##TODO
             ##map Lula obj into Medusa product
-            spamwriter.writerow([si_id, "", si_name])
+            spamwriter.writerow([
+    si_id, "", si_name, "", "", store_item_active, "", git_size, "", "", "", "", "", "", "", "", "", "", "", "", 
+    git_id, "", "", "", "", "", "", "", unit_count, "", "", "", "", "", "", "", "", "", price, "", "", "", si_image, git_image])
 
         
 
