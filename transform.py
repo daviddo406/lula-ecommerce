@@ -143,6 +143,7 @@ class MedusaProduct():
             ]
 
 
+skipped_count = 0
 with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
     spamwriter = csv.writer(csvfile, delimiter=';',
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -219,6 +220,7 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
             #region Special Handling on Columns
             if (not si_name or si_name == "NULL"):
                 print("SKIPPED: " + si_id)
+                skipped_count += 1
                 continue
 
             if (git_size == "NULL" or not git_size.isdigit()):
@@ -294,7 +296,4 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
 
             spamwriter.writerow(product.getProps())
         
-
-
-
-
+print(skipped_count)
