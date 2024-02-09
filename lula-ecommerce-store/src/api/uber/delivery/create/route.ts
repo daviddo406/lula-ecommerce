@@ -22,7 +22,12 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
                     "depth": 40
                 }
             }
-        ]
+        ],
+        "test_specifications": {
+            "robo_courier_specification": {
+                "mode": "auto"
+            }
+        }
     };
     const headers = {
         headers: {
