@@ -29,13 +29,21 @@ const ADMIN_CORS =
 const STORE_CORS = process.env.STORE_CORS || "http://localhost:8000";
 
 const DATABASE_URL =
-  process.env.DATABASE_URL || "postgres://localhost/medusa-starter-default";
+  process.env.DATABASE_URL || "postgres://postgres:${process.env.DB_PASSWORD}@localhost/medusa-starter-default";
 
 const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 
 const plugins = [
   `medusa-fulfillment-manual`,
   `medusa-payment-manual`,
+  {
+    resolve: `medusa-payment-stripe`,
+    options: {
+      api_key: process.env.STRIPE_API_KEY,
+      webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
+      capture: true,
+    },
+  },
   {
     resolve: `@medusajs/file-local`,
     options: {
