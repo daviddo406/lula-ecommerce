@@ -13,7 +13,8 @@
       "currency_code": "eur",
       "tax_rate": 0,
       "payment_providers": [
-        "manual"
+        "manual",
+        "Stripe"
       ],
       "fulfillment_providers": [
         "manual"
@@ -37,7 +38,8 @@
         "manual"
       ],
       "fulfillment_providers": [
-        "manual"
+        "manual",
+        "Stripe"
       ],
       "countries": [
         "us",

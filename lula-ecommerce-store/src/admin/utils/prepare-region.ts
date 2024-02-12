@@ -24,7 +24,8 @@ function getSampleRegion (store: Store) {
     currency_code: store.currencies[0].code,
     tax_rate: 0,
     payment_providers: [
-      "manual"
+      "manual",
+      "Stripe"
     ],
     fulfillment_providers: [
       "manual"
