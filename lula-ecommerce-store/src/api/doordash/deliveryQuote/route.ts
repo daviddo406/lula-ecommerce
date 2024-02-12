@@ -6,12 +6,6 @@ import {
 import { MedusaRequest, MedusaResponse } from "@medusajs/medusa";
 import { json } from "body-parser";
 
-export async function GET(req: MedusaRequest, res: MedusaResponse) {
-  res.json({
-    message: "Hello world!",
-  });
-}
-
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const client = new DoorDashClient({
     developer_id: String(process.env.DEVELOPER_ID),

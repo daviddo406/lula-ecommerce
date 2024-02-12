@@ -25,6 +25,7 @@
     "dev": "cross-env npm run build:server && medusa develop"
   },
   "dependencies": {
+    "@doordash/sdk": "^0.6.12",
     "@medusajs/admin": "7.1.10",
     "@medusajs/cache-inmemory": "^1.8.9",
     "@medusajs/cache-redis": "^1.8.9",
