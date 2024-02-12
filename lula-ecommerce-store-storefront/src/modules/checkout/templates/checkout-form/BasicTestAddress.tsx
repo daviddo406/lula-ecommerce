@@ -4,6 +4,7 @@ import { Button, Text } from "@medusajs/ui"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import DSPSummary from "./DSPSummary"
 import Divider from "@modules/common/components/divider"
+import { v4 as uuidv4 } from "uuid"
 
 function BasicAddress() {
   const [formData, setFormData] = useState({
@@ -32,9 +33,39 @@ function BasicAddress() {
   }
 
   const [displayQuote, setDisplayQuote] = useState(false)
+  const [deliveryQuote, setDeliveryQuote] = useState(0)
   const handleSubmit = () => {
     console.log("submitting for quote")
     setDisplayQuote(true)
+    getDeliveryQuote()
+  }
+  const getDeliveryQuote = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:9000/doordash/deliveryQuote",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            external_delivery_id: uuidv4(),
+            // cart pickup adress and phone number need to be passed in
+            pickup_address: "3400 Chestnut street, Philadelphia, PA, 19104",
+            pickup_phone_number: "+12156886986",
+            dropoff_address: formData["billing_address.address_1"],
+            dropoff_phone_number: "+1" + formData["billing_address.phone"],
+          }),
+        }
+      )
+
+      const data = await response.json()
+      console.log("yes - ", data, data.deliveryFee)
+
+      // Assuming setDeliveryQuote is a state setter function
+      setDeliveryQuote(data.deliveryFee / 100)
+
+      return deliveryQuote
+    } catch (error) {
+      console.error(error)
+    }
   }
   const router = useRouter()
   const pathname = usePathname()
@@ -110,7 +141,8 @@ function BasicAddress() {
         <div>
           {displayQuote && (
             <>
-              <Divider className="mt-8" /> <DSPSummary />{" "}
+              <Divider className="mt-8" />
+              <DSPSummary deliveryQuote={String(deliveryQuote)} />{" "}
             </>
           )}
           {/* <DSPSummary /> */}
