@@ -84,7 +84,7 @@ const ShippingAddress = ({
           <AddressSelect addresses={customer.shipping_addresses} cart={cart} />
         </Container>
       )}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 mb-4">
         <Input
           label="First name"
           name="shipping_address.first_name"
@@ -101,6 +101,25 @@ const ShippingAddress = ({
           onChange={handleChange}
           required
         />
+        <Input
+          label="Email"
+          name="email"
+          type="email"
+          title="Enter a valid email address."
+          autoComplete="email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+        />
+        <Input
+          label="Phone"
+          name="shipping_address.phone"
+          autoComplete="tel"
+          value={formData["shipping_address.phone"]}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
         <Input
           label="Address"
           name="shipping_address.address_1"
@@ -154,25 +173,6 @@ const ShippingAddress = ({
           name="same_as_billing"
           checked={checked}
           onChange={onChange}
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <Input
-          label="Email"
-          name="email"
-          type="email"
-          title="Enter a valid email address."
-          autoComplete="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
-        <Input
-          label="Phone"
-          name="shipping_address.phone"
-          autoComplete="tel"
-          value={formData["shipping_address.phone"]}
-          onChange={handleChange}
         />
       </div>
     </>
