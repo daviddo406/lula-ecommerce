@@ -148,6 +148,7 @@ def is_null_or_empty(string):
         return True
     return False
 
+## returns field1 if both are filled
 def get_filled_field(field1, field2):
     if (is_null_or_empty(field1) and is_null_or_empty(field2)):
         return None
@@ -273,30 +274,40 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
 
             if (git_count == "NULL" or git_count == ""):
                 git_count = 9999
+            else:
+                git_count_without_units = re.search(r'\d+', si_size)
+                if (git_count_without_units):
+                    git_count = int(git_count_without_units.group())
+
+            if (is_null_or_empty(tags)):
+                tags = ""
 
             # handle = "-".join(si_name.split(" ")).lower()
             # if (not handle): 
             #     handle = "no-name"
 
-            # if handle in found:
-            #     found[handle] += 1
-            # else:
-            #     found[handle] = 0
+            upc = get_filled_field(git_upc, si_upc)
+            handle = generate_handle(title, upc)
 
+            if handle in found:
+                found[handle] += 1
+            else:
+                found[handle] = 0
 
-            handle = generate_handle(title, git_upc)
+            # handle = handle + "-" + str(found[handle])
+            handle = handle
             #endregion
             
 
             product = MedusaProduct(
                 a_product_id="",
                 a_product_handle=handle,
-                a_product_title=si_name,
+                a_product_title=title,
                 a_product_subtitle="",
-                a_product_description=git_desc,
+                a_product_description="test-desc",
                 a_product_status="published",
-                a_product_thumbnail=git_image,
-                a_product_weight=si_size_without_units, #TODO
+                a_product_thumbnail="",
+                a_product_weight="",
                 a_product_length="",
                 a_product_width="",
                 a_product_height="",
@@ -309,12 +320,12 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
                 a_product_type="",
                 a_product_tags="",
                 a_product_discountable="true",
-                a_product_external_id="",
+                a_product_external_id=upc,
                 a_product_profile_name="",
                 a_product_profile_type="",
                 a_variant_id="",
-                a_variant_title=handle,
-                a_variant_sku="",
+                a_variant_title=title+"-variant",
+                a_variant_sku=upc,
                 a_variant_barcode="",
                 a_variant_inventory_quantity=git_count,
                 a_variant_allow_backorder="false",
@@ -331,8 +342,8 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
                 a_price_usd=si_price,
                 a_option_1_name="",
                 a_option_1_value="",
-                a_image_1_url=git_image,
-                a_image_2_url=si_image
+                a_image_1_url="",
+                a_image_2_url=""
                 )
 
             spamwriter.writerow(product.getProps())
