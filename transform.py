@@ -143,6 +143,24 @@ class MedusaProduct():
             ]
 
 
+def is_null_or_empty(string):
+    if (not string or string == "" or string == "NULL"):
+        return True
+    return False
+
+def get_filled_field(field1, field2):
+    if (is_null_or_empty(field1) and is_null_or_empty(field2)):
+        return None
+    elif (is_null_or_empty(field1)):
+        return field2
+    else:
+        return field1
+
+def generate_handle(title, upc):
+    handle = "-".join(title.split(" ")).lower()
+    handle += "-" + str(upc)
+    return handle
+
 skipped_count = 0
 with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
     spamwriter = csv.writer(csvfile, delimiter=';',
@@ -198,64 +216,87 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
 
     ##read Lula csv
     found = {}
-    with open('lula_store_item_data.csv', newline='') as csvfile:
+    with open('./lula-store-data/lula_store_item_dataV2.csv', newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter=',', quotechar='"', )
         next(reader, None)
         for ind, row in enumerate(reader):
-            store_name = row[1].replace("\"","")
-            si_name = row[2].replace("\"","")
-            si_size = row[3].replace("\"","")
-            git_size = row[4].replace("\"","") # INVALID, should have no units
-            unit_count = row[5].replace("\"","")
-            si_id = row[6].replace("\"","")
-            git_id = row[7].replace("\"","")
-            store_item_active = row[8].replace("\"","") # INVALID , published?
-            si_instock = row[9].replace("\"","")
-            si_image = row[10].replace("\"","").replace("{", "").replace("}", "")
-            git_image = row[11].replace("\"","").replace("{", "").replace("}", "")
-            price = row[12].replace("\"","")
-            si_upc = row[13].replace("\"","")
-            git_upc = row[14].replace("\"","")  
+            si_id = row[1].replace("\"","")
+            git_id = row[2].replace("\"","")
+            si_name = row[3].replace("\"","")
+            git_name = row[4].replace("\"","")
+            si_size = row[5].replace("\"","")
+            git_size = row[6].replace("\"","")
+            si_count = row[7] # NULL
+            git_count = row[8]
+            si_desc = row[9]
+            git_desc = row[10]
+            si_price = row[11]
+            si_upc = row[12] # NULL
+            git_upc = row[13]
+            category = row[14]
+            si_image = row[15]
+            git_image = row[16]
+            si_active = row[17]
+            si_instock = row[18]
+            tags = row[19]
+            
+            # store_name = row[1].replace("\"","")
+            # si_name = row[2].replace("\"","")
+            # si_size = row[3].replace("\"","")
+            # git_size = row[4].replace("\"","") # INVALID, should have no units
+            # unit_count = row[5].replace("\"","")
+            # si_id = row[6].replace("\"","")
+            # git_id = row[7].replace("\"","")
+            # store_item_active = row[8].replace("\"","") # INVALID , published?
+            # si_instock = row[9].replace("\"","")
+            # si_image = row[10].replace("\"","").replace("{", "").replace("}", "")
+            # git_image = row[11].replace("\"","").replace("{", "").replace("}", "")
+            # price = row[12].replace("\"","")
+            # si_upc = row[13].replace("\"","")
+            # git_upc = row[14].replace("\"","")  
 
             #region Special Handling on Columns
-            if (not si_name or si_name == "NULL"):
+            title = get_filled_field(si_name, git_name)
+
+            if (title == None):
                 print("SKIPPED: " + si_id)
                 skipped_count += 1
                 continue
 
-            if (git_size == "NULL" or not git_size.isdigit()):
-                git_size_without_units = 0
+            
+            if (si_size == "NULL" or not si_size.isdigit()):
+                si_size_without_units = 0
             else:
-                size_without_units = re.search(r'\d+', git_size)
+                size_without_units = re.search(r'\d+', si_size)
                 if (size_without_units):
-                    git_size_without_units = int(size_without_units.group())
+                    si_size_without_units = int(size_without_units.group())
 
-            if (unit_count == "NULL" or unit_count == ""):
-                unit_count = 0
+            if (git_count == "NULL" or git_count == ""):
+                git_count = 9999
 
-            if (price == "NULL"):
-                price = 1
-                
-            handle = "-".join(si_name.split(" ")).lower()
-            if (not handle): 
-                handle = "no-name"
+            # handle = "-".join(si_name.split(" ")).lower()
+            # if (not handle): 
+            #     handle = "no-name"
 
-            if handle in found:
-                found[handle] += 1
-            else:
-                found[handle] = 0
+            # if handle in found:
+            #     found[handle] += 1
+            # else:
+            #     found[handle] = 0
 
+
+            handle = generate_handle(title, git_upc)
             #endregion
             
+
             product = MedusaProduct(
                 a_product_id="",
-                a_product_handle=handle+str(found[handle]),
+                a_product_handle=handle,
                 a_product_title=si_name,
                 a_product_subtitle="",
-                a_product_description="test-product-description",
+                a_product_description=git_desc,
                 a_product_status="published",
-                a_product_thumbnail=si_image,
-                a_product_weight=git_size_without_units,
+                a_product_thumbnail=git_image,
+                a_product_weight=si_size_without_units, #TODO
                 a_product_length="",
                 a_product_width="",
                 a_product_height="",
@@ -272,10 +313,10 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
                 a_product_profile_name="",
                 a_product_profile_type="",
                 a_variant_id="",
-                a_variant_title=handle+str(found[handle]),
+                a_variant_title=handle,
                 a_variant_sku="",
                 a_variant_barcode="",
-                a_variant_inventory_quantity=unit_count,
+                a_variant_inventory_quantity=git_count,
                 a_variant_allow_backorder="false",
                 a_variant_manage_inventory="true",
                 a_variant_weight="",
@@ -286,14 +327,15 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
                 a_variant_origin_country="",
                 a_variant_mid_code="",
                 a_variant_material="",
-                a_price_eur=price,
-                a_price_usd=price,
+                a_price_eur=si_price, #TODO convert US to EU
+                a_price_usd=si_price,
                 a_option_1_name="",
                 a_option_1_value="",
-                a_image_1_url=si_image,
-                a_image_2_url=git_image
+                a_image_1_url=git_image,
+                a_image_2_url=si_image
                 )
 
             spamwriter.writerow(product.getProps())
-        
-print(skipped_count)
+
+
+print("SKIPPED ENTRIES: " + str(skipped_count))
