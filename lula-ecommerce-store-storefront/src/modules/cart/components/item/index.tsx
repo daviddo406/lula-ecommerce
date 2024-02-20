@@ -64,36 +64,34 @@ const Item = ({ item, region, type = "full" }: ItemProps) => {
         <LineItemOptions variant={item.variant} />
       </Table.Cell>
 
-      {type === "full" && (
-        <Table.Cell>
-          <div className="flex gap-2 items-center w-28">
-            <DeleteButton id={item.id} />
-            <CartItemSelect
-              value={item.quantity}
-              onChange={(value) => changeQuantity(parseInt(value.target.value))}
-              className="w-14 h-10 p-4"
-            >
-              {Array.from(
-                {
-                  length: Math.min(
-                    item.variant.inventory_quantity > 0
-                      ? item.variant.inventory_quantity
-                      : 10,
-                    10
-                  ),
-                },
-                (_, i) => (
-                  <option value={i + 1} key={i}>
-                    {i + 1}
-                  </option>
-                )
-              )}
-            </CartItemSelect>
-            {updating && <Spinner />}
-          </div>
-          <ErrorMessage error={error} />
-        </Table.Cell>
-      )}
+      <Table.Cell>
+        <div className="flex gap-2 items-center w-28">
+          <DeleteButton id={item.id} />
+          <CartItemSelect
+            value={item.quantity}
+            onChange={(value) => changeQuantity(parseInt(value.target.value))}
+            className="w-14 h-10 p-4"
+          >
+            {Array.from(
+              {
+                length: Math.min(
+                  item.variant.inventory_quantity > 0
+                    ? item.variant.inventory_quantity
+                    : 10,
+                  10
+                ),
+              },
+              (_, i) => (
+                <option value={i + 1} key={i}>
+                  {i + 1}
+                </option>
+              )
+            )}
+          </CartItemSelect>
+          {updating && <Spinner />}
+        </div>
+        <ErrorMessage error={error} />
+      </Table.Cell>
 
       {type === "full" && (
         <Table.Cell className="hidden small:table-cell">
