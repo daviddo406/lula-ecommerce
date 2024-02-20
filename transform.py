@@ -162,13 +162,10 @@ def generate_handle(title, upc):
     handle += "-" + str(upc)
     return handle
 
-skipped_count = 0
-with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
-    spamwriter = csv.writer(csvfile, delimiter=';',
-                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
+def write_template_header(writer):
     ##write header
-    spamwriter.writerow([
+    writer.writerow([
         "Product Id",
         "Product Handle",
         "Product Title",
@@ -215,12 +212,20 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
         "Image 2 Url"
     ])
 
+skipped_count = 0
+with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
+    spamwriter = csv.writer(csvfile, delimiter=';',
+                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
+
+    write_template_header(spamwriter)
+
     ##read Lula csv
     found = {}
     with open('./lula-store-data/lula_store_item_dataV2.csv', newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter=',', quotechar='"', )
         next(reader, None)
         for ind, row in enumerate(reader):
+            #region MAPPING
             si_id = row[1].replace("\"","")
             git_id = row[2].replace("\"","")
             si_name = row[3].replace("\"","")
@@ -240,6 +245,7 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
             si_active = row[17]
             si_instock = row[18]
             tags = row[19].replace("{", "").replace("}", "")
+            #endregion
 
             #region Special Handling on Columns
             title = get_filled_field(si_name, git_name)
@@ -249,7 +255,7 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
                 skipped_count += 1
                 continue
 
-            
+
             if (si_size == "NULL" or not si_size.isdigit()):
                 si_size_without_units = 0
             else:
@@ -270,6 +276,7 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
             upc = get_filled_field(git_upc, si_upc)
             handle = generate_handle(title, upc)
             image = get_filled_field(git_image, si_image)
+
             # if handle in found:
             #     found[handle] += 1
             # else:
