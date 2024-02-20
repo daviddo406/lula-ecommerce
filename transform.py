@@ -235,26 +235,11 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
             si_upc = row[12] # NULL
             git_upc = row[13]
             category = row[14]
-            si_image = row[15]
-            git_image = row[16]
+            si_image = row[15].replace("{", "").replace("}", "")
+            git_image = row[16].replace("{", "").replace("}", "")
             si_active = row[17]
             si_instock = row[18]
-            tags = row[19]
-            
-            # store_name = row[1].replace("\"","")
-            # si_name = row[2].replace("\"","")
-            # si_size = row[3].replace("\"","")
-            # git_size = row[4].replace("\"","") # INVALID, should have no units
-            # unit_count = row[5].replace("\"","")
-            # si_id = row[6].replace("\"","")
-            # git_id = row[7].replace("\"","")
-            # store_item_active = row[8].replace("\"","") # INVALID , published?
-            # si_instock = row[9].replace("\"","")
-            # si_image = row[10].replace("\"","").replace("{", "").replace("}", "")
-            # git_image = row[11].replace("\"","").replace("{", "").replace("}", "")
-            # price = row[12].replace("\"","")
-            # si_upc = row[13].replace("\"","")
-            # git_upc = row[14].replace("\"","")  
+            tags = row[19].replace("{", "").replace("}", "")
 
             #region Special Handling on Columns
             title = get_filled_field(si_name, git_name)
@@ -282,20 +267,15 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
             if (is_null_or_empty(tags)):
                 tags = ""
 
-            # handle = "-".join(si_name.split(" ")).lower()
-            # if (not handle): 
-            #     handle = "no-name"
-
             upc = get_filled_field(git_upc, si_upc)
             handle = generate_handle(title, upc)
-
-            if handle in found:
-                found[handle] += 1
-            else:
-                found[handle] = 0
+            image = get_filled_field(git_image, si_image)
+            # if handle in found:
+            #     found[handle] += 1
+            # else:
+            #     found[handle] = 0
 
             # handle = handle + "-" + str(found[handle])
-            handle = handle
             #endregion
             
 
@@ -304,9 +284,9 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
                 a_product_handle=handle,
                 a_product_title=title,
                 a_product_subtitle="",
-                a_product_description="test-desc",
+                a_product_description=git_desc,
                 a_product_status="published",
-                a_product_thumbnail="",
+                a_product_thumbnail=image,
                 a_product_weight="",
                 a_product_length="",
                 a_product_width="",
@@ -317,14 +297,14 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
                 a_product_material="",
                 a_product_collection_title="",
                 a_product_collection_handle="",
-                a_product_type="",
-                a_product_tags="",
+                a_product_type=category,
+                a_product_tags=tags,
                 a_product_discountable="true",
                 a_product_external_id=upc,
                 a_product_profile_name="",
                 a_product_profile_type="",
                 a_variant_id="",
-                a_variant_title=title+"-variant",
+                a_variant_title=title,
                 a_variant_sku=upc,
                 a_variant_barcode="",
                 a_variant_inventory_quantity=git_count,
@@ -342,8 +322,8 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
                 a_price_usd=si_price,
                 a_option_1_name="",
                 a_option_1_value="",
-                a_image_1_url="",
-                a_image_2_url=""
+                a_image_1_url=image,
+                a_image_2_url="" ## image acts as duplicate if using si_image here
                 )
 
             spamwriter.writerow(product.getProps())
