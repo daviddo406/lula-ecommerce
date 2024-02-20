@@ -222,14 +222,20 @@ export async function listShippingMethods(
 export async function addShippingMethod({
   cartId,
   shippingMethodId,
+  data,
 }: {
   cartId: string
   shippingMethodId: string
+  data: { quoteId: string; price: number }
 }) {
   const headers = getMedusaHeaders(["cart"])
 
   return medusaClient.carts
-    .addShippingMethod(cartId, { option_id: shippingMethodId }, headers)
+    .addShippingMethod(
+      cartId,
+      { option_id: shippingMethodId, data: data },
+      headers
+    )
     .then(({ cart }) => cart)
     .catch((err) => medusaError(err))
 }
