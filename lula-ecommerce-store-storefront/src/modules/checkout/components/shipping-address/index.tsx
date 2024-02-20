@@ -4,7 +4,11 @@ import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
 import AddressSelect from "../address-select"
 import CountrySelect from "../country-select"
-import { Container } from "@medusajs/ui"
+import { Button, Container } from "@medusajs/ui"
+import Divider from "@modules/common/components/divider"
+import DSPSummary from "@modules/checkout/templates/checkout-form/DSPSummary"
+import { v4 as uuidv4 } from "uuid"
+import { setShippingMethod } from "@modules/checkout/actions"
 
 const ShippingAddress = ({
   customer,
@@ -12,12 +16,14 @@ const ShippingAddress = ({
   checked,
   onChange,
   countryCode,
+  checkoutOption,
 }: {
   customer: Omit<Customer, "password_hash"> | null
   cart: Omit<Cart, "refundable_amount" | "refunded_total"> | null
   checked: boolean
   onChange: () => void
   countryCode: string
+  checkoutOption: string
 }) => {
   const [formData, setFormData] = useState({
     "shipping_address.first_name": cart?.shipping_address?.first_name || "",
@@ -74,6 +80,71 @@ const ShippingAddress = ({
     })
   }
 
+  const isValid = Object.entries(formData).every(([key, value]) => {
+    // Check if the key is not "company" and if the value is not an empty string
+    if (key !== "company") {
+      return value !== ""
+    }
+    return true // Always return true for the "company" key
+  })
+
+  const [displayQuote, setDisplayQuote] = useState(false)
+  const [deliveryQuote, setDeliveryQuote] = useState(0)
+  const handleSubmit = () => {
+    console.log("submitting for quote")
+    setDisplayQuote(true)
+    getDeliveryQuote()
+  }
+
+  // ----------- Layo Edits ---------------
+  // Needs better error checking and code cleanUp
+  const getDeliveryQuote = async () => {
+    try {
+      const doordashQuote = await fetch(
+        "http://localhost:9000/doordash/deliveryQuote",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            external_delivery_id: uuidv4(),
+            // Get store info from admin?
+            pickup_address: "3400 Chestnut street, Philadelphia, PA, 19104",
+            pickup_phone_number: "+12156886986",
+            dropoff_address: formData["shipping_address.address_1"],
+            dropoff_phone_number: "+1" + formData["shipping_address.phone"],
+          }),
+        }
+      )
+      console.log("Doordash done")
+      const doordashResponse = await doordashQuote.json()
+      console.log("doordash - ", doordashResponse, doordashResponse.deliveryFee)
+
+      // Layo - need to send actual delivery paramets to Uber request
+      const UberQuote = await fetch("http://localhost:9000/uber/quote", {
+        method: "POST",
+        body: JSON.stringify({
+          pickup_address: "3400 Chestnut street, Philadelphia, PA 19104",
+          dropoff_address: `{"street_address":["${formData["shipping_address.address_1"]}"],"city":"${formData["shipping_address.city"]}","state":"${formData["shipping_address.province"]}","zip_code":"${formData["shipping_address.postal_code"]}","country":"US"}`,
+        }),
+      })
+
+      console.log("Uber done")
+      const uberResponse = await UberQuote.json()
+      console.log("uber - ", uberResponse, uberResponse.fee)
+
+      const deliveryFee: number = Math.min(
+        doordashResponse.deliveryFee,
+        uberResponse.fee
+      )
+      console.log("SETTING - ", deliveryFee)
+      //Layo - need shipping method ID for below
+      await setShippingMethod("so_01HPYFT907BXA0MC04AKKYRZ20", deliveryFee)
+
+      return deliveryQuote
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   return (
     <>
       {customer && (addressesInRegion?.length || 0) > 0 && (
@@ -101,52 +172,56 @@ const ShippingAddress = ({
           onChange={handleChange}
           required
         />
-        <Input
-          label="Address"
-          name="shipping_address.address_1"
-          autoComplete="address-line1"
-          value={formData["shipping_address.address_1"]}
-          onChange={handleChange}
-          required
-        />
-        <Input
-          label="Company"
-          name="shipping_address.company"
-          value={formData["shipping_address.company"]}
-          onChange={handleChange}
-          autoComplete="organization"
-        />
-        <Input
-          label="Postal code"
-          name="shipping_address.postal_code"
-          autoComplete="postal-code"
-          value={formData["shipping_address.postal_code"]}
-          onChange={handleChange}
-          required
-        />
-        <Input
-          label="City"
-          name="shipping_address.city"
-          autoComplete="address-level2"
-          value={formData["shipping_address.city"]}
-          onChange={handleChange}
-          required
-        />
-        <CountrySelect
-          name="shipping_address.country_code"
-          autoComplete="country"
-          region={cart?.region}
-          value={formData["shipping_address.country_code"]}
-          onChange={handleChange}
-          required
-        />
-        <Input
-          label="State / Province"
-          name="shipping_address.province"
-          autoComplete="address-level1"
-          value={formData["shipping_address.province"]}
-          onChange={handleChange}
-        />
+        {checkoutOption == "Delivery" && (
+          <>
+            <Input
+              label="Address"
+              name="shipping_address.address_1"
+              autoComplete="address-line1"
+              value={formData["shipping_address.address_1"]}
+              onChange={handleChange}
+              required
+            />
+            <Input
+              label="Company"
+              name="shipping_address.company"
+              value={formData["shipping_address.company"]}
+              onChange={handleChange}
+              autoComplete="organization"
+            />
+            <Input
+              label="Postal code"
+              name="shipping_address.postal_code"
+              autoComplete="postal-code"
+              value={formData["shipping_address.postal_code"]}
+              onChange={handleChange}
+              required
+            />
+            <Input
+              label="City"
+              name="shipping_address.city"
+              autoComplete="address-level2"
+              value={formData["shipping_address.city"]}
+              onChange={handleChange}
+              required
+            />
+            <CountrySelect
+              name="shipping_address.country_code"
+              autoComplete="country"
+              region={cart?.region}
+              value={formData["shipping_address.country_code"]}
+              onChange={handleChange}
+              required
+            />
+            <Input
+              label="State / Province"
+              name="shipping_address.province"
+              autoComplete="address-level1"
+              value={formData["shipping_address.province"]}
+              onChange={handleChange}
+            />
+          </>
+        )}
       </div>
       <div className="my-8">
         <Checkbox
@@ -175,6 +250,21 @@ const ShippingAddress = ({
           onChange={handleChange}
         />
       </div>
+      <div>
+        {isValid && checkoutOption === "Delivery" && (
+          <Button size="large" className="mt-6" onClick={handleSubmit}>
+            Continue to payment
+          </Button>
+        )}
+      </div>
+      {/* <div>
+        {displayQuote && (
+          <>
+            <Divider className="mt-8" />
+            <DSPSummary deliveryQuote={String(deliveryQuote)} />{" "}
+          </>
+        )}
+      </div> */}
     </>
   )
 }
