@@ -277,6 +277,9 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
             handle = generate_handle(title, upc)
             image = get_filled_field(git_image, si_image)
 
+            ##TODO
+            ##load all data in, while creating proper parent items so that we can link variants.
+
             # if handle in found:
             #     found[handle] += 1
             # else:
