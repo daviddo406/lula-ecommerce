@@ -1,4 +1,7 @@
 .vscode
 lula-ecommerce-store-storefront/yarn.lock
 lula-ecommerce-store/.env
-LULA_TO_MEDUSA_IMPORT.csv
+*.csv
+lula-ecommerce-store/.env
+lula-ecommerce-store-storefront/yarn.lock
+
