@@ -1,5 +1,6 @@
 import { Github } from "@medusajs/icons"
 import { Button, Heading } from "@medusajs/ui"
+import SearchBox from "@modules/search/components/search-box"
 
 const Hero = () => {
   return (
