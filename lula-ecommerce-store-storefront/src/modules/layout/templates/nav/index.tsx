@@ -1,5 +1,7 @@
+
 import { cookies } from "next/headers"
 import Link from "next/link"
+
 import { Suspense } from "react"
 
 import { listRegions } from "@lib/data"
@@ -21,25 +23,49 @@ export default async function Nav() {
             </div>
           </div>
 
-          <div className="flex items-center h-full">
+          {/* <div className="flex items-center h-full">
             <Link
               href="/"
               className="txt-compact-xlarge-plus hover:text-ui-fg-base uppercase"
             >
               Test Store
             </Link>
-          </div>
+          </div> */}
 
           <div className="flex items-center gap-x-6 h-full flex-1 basis-0 justify-end">
             <div className="hidden small:flex items-center gap-x-6 h-full">
               {process.env.FEATURE_SEARCH_ENABLED && (
-                <Link
-                  className="hover:text-ui-fg-base"
-                  href="/search"
-                  scroll={false}
-                >
-                  Search
-                </Link>
+                // Update the form to use a direct submission approach
+                <form action="/search" method="get" className="flex items-center">
+                  <input
+                    type="text"
+                    name="q" // The query parameter name expected by your search page
+                    placeholder="Search... for your favorite snacks"
+                    style={{
+                      width: '300px', // Increase width as per your design requirements
+                      height: '40px', // Increase height to make the bar taller
+                      padding: '10px', // Add padding inside the search bar
+                      fontSize: '16px', // Increase font size if necessary
+                      // Add additional styles if needed
+                    }}
+                    className="input-class" // Your input classes here
+                  />
+                  <button 
+                  type="submit" 
+                  style={{
+                    backgroundImage: `url('/search.png')`, // Make sure the path is correct
+                    backgroundSize: 'cover', // This ensures that your image covers the button area
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center',
+                    width: '25px', // Specify the width of your button
+                    height: '25px', // Specify the height of your button
+                    border: 'none', // Remove default button border
+                    cursor: 'pointer', // Change cursor to pointer on hover
+                  }}
+                  aria-label="Search" // Accessibility for screen readers
+                  >
+</button>
+                </form>
               )}
               <Link className="hover:text-ui-fg-base" href="/account">
                 Account
