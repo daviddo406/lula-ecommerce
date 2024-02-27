@@ -111,7 +111,7 @@ const Addresses = ({
               checkoutOption={deliveryOption}
             />
 
-            {!sameAsSBilling && (
+            {deliveryOption === "Pickup" && (
               <div>
                 <Heading
                   level="h2"

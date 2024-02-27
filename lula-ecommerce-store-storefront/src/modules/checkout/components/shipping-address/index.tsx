@@ -172,6 +172,24 @@ const ShippingAddress = ({
           onChange={handleChange}
           required
         />
+        <Input
+          label="Email"
+          name="email"
+          type="email"
+          title="Enter a valid email address."
+          autoComplete="email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+        />
+        <Input
+          label="Phone"
+          name="shipping_address.phone"
+          autoComplete="tel"
+          value={formData["shipping_address.phone"]}
+          onChange={handleChange}
+          required
+        />
         {checkoutOption == "Delivery" && (
           <>
             <Input
@@ -223,33 +241,16 @@ const ShippingAddress = ({
           </>
         )}
       </div>
-      <div className="my-8">
-        <Checkbox
-          label="Same as billing address"
-          name="same_as_billing"
-          checked={checked}
-          onChange={onChange}
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <Input
-          label="Email"
-          name="email"
-          type="email"
-          title="Enter a valid email address."
-          autoComplete="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
-        <Input
-          label="Phone"
-          name="shipping_address.phone"
-          autoComplete="tel"
-          value={formData["shipping_address.phone"]}
-          onChange={handleChange}
-        />
-      </div>
+      {checkoutOption === "Delivery" && (
+        <div className="my-8">
+          <Checkbox
+            label="Same as billing address"
+            name="same_as_billing"
+            checked={checked}
+            onChange={onChange}
+          />
+        </div>
+      )}
       <div>
         {isValid && checkoutOption === "Delivery" && (
           <Button size="large" className="mt-6" onClick={handleSubmit}>
@@ -257,14 +258,6 @@ const ShippingAddress = ({
           </Button>
         )}
       </div>
-      {/* <div>
-        {displayQuote && (
-          <>
-            <Divider className="mt-8" />
-            <DSPSummary deliveryQuote={String(deliveryQuote)} />{" "}
-          </>
-        )}
-      </div> */}
     </>
   )
 }
