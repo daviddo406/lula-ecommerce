@@ -11,6 +11,8 @@ import { cookies } from "next/headers"
 import { CartWithCheckoutStep } from "types/global"
 import { getCheckoutStep } from "@lib/util/get-checkout-step"
 
+import CheckoutOptions from "./CheckoutOptions"
+
 export default async function CheckoutForm() {
   const cartId = cookies().get("_medusa_cart_id")?.value
 
@@ -55,12 +57,15 @@ export default async function CheckoutForm() {
           />
         </div>
 
-        <div>
+        {/* <div>
           <Shipping
             cart={cart}
             availableShippingMethods={availableShippingMethods}
           />
-        </div>
+        </div> */}
+        {/* <div>
+          <CheckoutOptions cart={cart} />
+        </div> */}
 
         <div>
           <Payment cart={cart} />
