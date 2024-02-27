@@ -17,6 +17,7 @@ const CartTotals: React.FC<CartTotalsProps> = ({ data }) => {
     gift_card_total,
     tax_total,
     shipping_total,
+    //tip_total,
     total,
   } = data
 
