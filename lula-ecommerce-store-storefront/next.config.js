@@ -25,6 +25,26 @@ const nextConfig = withStoreConfig({
         protocol: "https",
         hostname: "medusa-server-testing.s3.us-east-1.amazonaws.com",
       },
+      {
+        protocol: "https",
+        hostname: "lula-inventory-service-production.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "menu-item-images-bucket.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "img.cdn4dd.com",
+      },
+      {
+        protocol: "https",
+        hostname: "go-upc.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "lula-inventory-service-staging.s3.amazonaws.com",
+      },
     ],
   },
 })
