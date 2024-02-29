@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 import { cookies } from "next/headers"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { LineItem } from "@medusajs/medusa"
 
 import { enrichLineItems, retrieveCart } from "@modules/cart/actions"
@@ -36,6 +36,10 @@ export default async function Checkout() {
     return notFound()
   }
 
+  if (!cart?.items.length) {
+    redirect("/cart")
+  }
+  
   return (
     <div className="grid grid-cols-1 small:grid-cols-[1fr_416px] content-container gap-x-40 py-12">
       <Wrapper cart={cart}>

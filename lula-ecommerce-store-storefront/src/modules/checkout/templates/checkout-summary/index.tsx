@@ -23,9 +23,9 @@ const CheckoutSummary = async () => {
         >
           In your Cart
         </Heading>
-        <Divider className="my-6" />
-        <CartTotals data={cart} />
+        <Divider className="mt-6" />
         <ItemsPreviewTemplate region={cart?.region} items={cart?.items} />
+        <CartTotals data={cart} />
         <div className="my-6">
           <DiscountCode cart={cart} />
         </div>
