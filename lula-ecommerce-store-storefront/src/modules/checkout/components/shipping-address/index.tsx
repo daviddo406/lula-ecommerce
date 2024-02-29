@@ -5,10 +5,9 @@ import Input from "@modules/common/components/input"
 import AddressSelect from "../address-select"
 import CountrySelect from "../country-select"
 import { Button, Container } from "@medusajs/ui"
-import Divider from "@modules/common/components/divider"
-import DSPSummary from "@modules/checkout/templates/checkout-form/DSPSummary"
 import { v4 as uuidv4 } from "uuid"
 import { setShippingMethod } from "@modules/checkout/actions"
+import { medusaClient } from "@lib/config"
 
 const ShippingAddress = ({
   customer,
@@ -136,8 +135,21 @@ const ShippingAddress = ({
         uberResponse.fee
       )
       console.log("SETTING - ", deliveryFee)
-      //Layo - need shipping method ID for below
-      await setShippingMethod("so_01HPYFT907BXA0MC04AKKYRZ20", deliveryFee)
+
+      // You'll be able to access the delivery quote id using this -> cart?.shipping_methods[0].data.quoteId
+      let deliveryQuoteId: string = "";
+      if (deliveryFee === doordashResponse.deliveryFee) {
+        deliveryQuoteId = doordashResponse.external_delivery_id;
+      } else {
+        deliveryQuoteId = uberResponse.id;
+      }
+
+      const shippingMethodId = await medusaClient.shippingOptions.list()
+        .then(({ shipping_options }) => {
+          return shipping_options[0]["id"]
+        })
+      // Need to send back quoteID also
+      await setShippingMethod(shippingMethodId !== undefined ? shippingMethodId : "None", deliveryFee, deliveryQuoteId)
 
       return deliveryQuote
     } catch (error) {

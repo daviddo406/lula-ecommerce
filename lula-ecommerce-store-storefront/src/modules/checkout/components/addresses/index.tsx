@@ -17,6 +17,7 @@ import ErrorMessage from "../error-message"
 import compareAddresses from "@lib/util/compare-addresses"
 
 import { ChangeEvent, useState } from "react"
+import { medusaClient } from "@lib/config"
 
 const Addresses = ({
   cart,
@@ -51,8 +52,11 @@ const Addresses = ({
   }
 
   const handleSubmit = async () => {
-    //Layo - need shipping method ID for below
-    await setShippingMethod("so_01HPYFT907BXA0MC04AKKYRZ20", 0)
+    const shippingMethodId = await medusaClient.shippingOptions.list()
+    .then(({ shipping_options }) => {
+      return shipping_options[0]["id"]
+    })
+    await setShippingMethod(shippingMethodId !== undefined ? shippingMethodId : "None", 0, "pickup")
   }
 
   return (
