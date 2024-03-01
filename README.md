@@ -179,20 +179,20 @@ After logging in, go to Products on the left hand side, and click on Collections
 
 Next click on "+ New Collection", and add all of these below where (Water is Title and water is Handle):
 
-Water
-Wine
-Snacks
-Seltzer
-Candy
-Beer
-Alcohol
-Personal Care
-Beverages
-Grocery
-Automotive
-Milk
-Quick Meals
-Bakery
+Water,
+Wine,
+Snacks,
+Seltzer,
+Candy,
+Beer,
+Alcohol,
+Personal Care,
+Beverages,
+Grocery,
+Automotive,
+Milk,
+Quick Meals,
+Bakery,
 Others
 
 
@@ -237,7 +237,7 @@ chmod +x reset-db.sh
 
 
 ### IF YOU GET MEILISEARCH ERRORS INVOLVING HOSTNAMES FROM IMAGES NOT INCLUDED IN next.config.js
-```
+
 Locate next.config.js under /lula-ecommerce-store-storefront
 
 Add new entry with missing hostname from error code in here:
@@ -263,5 +263,3 @@ images: {
       },
 ```
 
-
-*At this point you will be prompted for your postgres Password, enter it a few times when asked to reset the database*
