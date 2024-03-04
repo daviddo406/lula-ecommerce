@@ -4,7 +4,6 @@ import BasicAddress from "./BasicTestAddress"
 import { Button, Text } from "@medusajs/ui"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
-import { v4 as uuidv4 } from "uuid"
 interface Props {
   deliveryQuote: string
 }

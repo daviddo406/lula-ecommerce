@@ -39,7 +39,8 @@
         "Stripe"
       ],
       "fulfillment_providers": [
-        "manual"
+        "manual",
+        "Stripe"
       ],
       "countries": [
         "us",

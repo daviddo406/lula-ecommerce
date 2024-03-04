@@ -60,6 +60,15 @@ const plugins = [
       },
     },
   },
+  {
+    resolve: `medusa-payment-paypal`,
+    options: {
+      sandbox: process.env.PAYPAL_SANDBOX,
+      clientId: process.env.PAYPAL_CLIENT_ID,
+      clientSecret: process.env.PAYPAL_CLIENT_SECRET,
+      authWebhookId: process.env.PAYPAL_AUTH_WEBHOOK_ID,
+    },
+  },
 ];
 
 const modules = {

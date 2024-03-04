@@ -4,7 +4,6 @@ import {
   DoorDashResponse,
 } from "@doordash/sdk";
 import { MedusaRequest, MedusaResponse } from "@medusajs/medusa";
-import { json } from "body-parser";
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const client = new DoorDashClient({
