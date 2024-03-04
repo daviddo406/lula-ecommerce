@@ -17,6 +17,7 @@ import ErrorMessage from "../error-message"
 import compareAddresses from "@lib/util/compare-addresses"
 
 import { ChangeEvent, useState } from "react"
+import { medusaClient } from "@lib/config"
 
 const Addresses = ({
   cart,
@@ -51,8 +52,11 @@ const Addresses = ({
   }
 
   const handleSubmit = async () => {
-    //Layo - need shipping method ID for below
-    await setShippingMethod("so_01HPYFT907BXA0MC04AKKYRZ20", 0)
+    const shippingMethodId = await medusaClient.shippingOptions.list()
+    .then(({ shipping_options }) => {
+      return shipping_options[0]["id"]
+    })
+    await setShippingMethod(shippingMethodId !== undefined ? shippingMethodId : "None", 0, "pickup")
   }
 
   return (
@@ -62,7 +66,7 @@ const Addresses = ({
           level="h2"
           className="flex flex-row text-3xl-regular gap-x-2 items-baseline"
         >
-          Address
+          Contact Info
           {!isOpen && <CheckCircleSolid />}
         </Heading>
         {!isOpen && cart?.shipping_address && (
@@ -137,13 +141,25 @@ const Addresses = ({
             {cart && cart.shipping_address ? (
               <div className="flex items-start gap-x-8">
                 <div className="flex items-start gap-x-1 w-full">
-                  <div className="flex flex-col w-1/3">
+                  <div className="flex flex-col w-1/3 ">
                     <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                      Shipping Address
+                      Contact
                     </Text>
                     <Text className="txt-medium text-ui-fg-subtle">
                       {cart.shipping_address.first_name}{" "}
                       {cart.shipping_address.last_name}
+                    </Text>
+                    <Text className="txt-medium text-ui-fg-subtle">
+                      {cart.shipping_address.phone}
+                    </Text>
+                    <Text className="txt-medium text-ui-fg-subtle">
+                      {cart.email}
+                    </Text>
+                  </div>
+
+                  <div className="flex flex-col w-1/3">
+                    <Text className="txt-medium-plus text-ui-fg-base mb-1">
+                      Delivery Address
                     </Text>
                     <Text className="txt-medium text-ui-fg-subtle">
                       {cart.shipping_address.address_1}{" "}
@@ -155,18 +171,6 @@ const Addresses = ({
                     </Text>
                     <Text className="txt-medium text-ui-fg-subtle">
                       {cart.shipping_address.country_code?.toUpperCase()}
-                    </Text>
-                  </div>
-
-                  <div className="flex flex-col w-1/3 ">
-                    <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                      Contact
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.phone}
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.email}
                     </Text>
                   </div>
 
