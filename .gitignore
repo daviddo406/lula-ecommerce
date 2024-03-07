@@ -4,4 +4,4 @@ lula-ecommerce-store/.env
 *.csv
 lula-ecommerce-store/.env
 lula-ecommerce-store-storefront/yarn.lock
-
+__pycache__
