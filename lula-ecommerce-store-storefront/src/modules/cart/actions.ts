@@ -161,9 +161,10 @@ export async function enrichLineItems(
   | Omit<LineItem, "beforeInsert" | "beforeUpdate" | "afterUpdateOrLoad">[]
   | undefined
 > {
+  const lineItemsWithVariants = lineItems.filter((lineItem) => lineItem.title !== "Tip")
   // Prepare query parameters
   const queryParams = {
-    ids: lineItems.map((lineItem) => lineItem.variant.product_id),
+    ids: lineItemsWithVariants.map((lineItem) => lineItem.variant.product_id),
     regionId: regionId,
   }
 
@@ -177,7 +178,7 @@ export async function enrichLineItems(
 
   // Enrich line items with product and variant information
 
-  const enrichedItems = lineItems.map((item) => {
+  const enrichedItems = lineItemsWithVariants.map((item) => {
     const product = products.find((p) => p.id === item.variant.product_id)
     const variant = product?.variants.find((v) => v.id === item.variant_id)
 
