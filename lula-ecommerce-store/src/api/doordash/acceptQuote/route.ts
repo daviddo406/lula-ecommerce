@@ -12,13 +12,13 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     signing_secret: String(process.env.SIGNING_SECRET),
   });
 
-  console.log(req.body);
+  console.log(req.body, typeof req.body);
 
   client
     .deliveryQuoteAccept(req.body)
     .then((response: DoorDashResponse<DeliveryResponse>) => {
       // do something
-      console.log("Accept Quote");
+      console.log("Accept Doordash Quote");
     })
     .catch((err: any) => {
       // handle error

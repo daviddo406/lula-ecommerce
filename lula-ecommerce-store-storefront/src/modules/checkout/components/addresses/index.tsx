@@ -52,11 +52,16 @@ const Addresses = ({
   }
 
   const handleSubmit = async () => {
-    const shippingMethodId = await medusaClient.shippingOptions.list()
-    .then(({ shipping_options }) => {
-      return shipping_options[0]["id"]
-    })
-    await setShippingMethod(shippingMethodId !== undefined ? shippingMethodId : "None", 0, "pickup")
+    const shippingMethodId = await medusaClient.shippingOptions
+      .list()
+      .then(({ shipping_options }) => {
+        return shipping_options[0]["id"]
+      })
+    await setShippingMethod(
+      shippingMethodId !== undefined ? shippingMethodId : "None",
+      0,
+      "pickup"
+    )
   }
 
   return (

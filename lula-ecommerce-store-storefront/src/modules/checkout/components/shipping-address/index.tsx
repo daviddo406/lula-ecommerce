@@ -4,10 +4,12 @@ import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
 import AddressSelect from "../address-select"
 import CountrySelect from "../country-select"
-import { Button, Container } from "@medusajs/ui"
+import { Button, Container, Heading } from "@medusajs/ui"
 import { v4 as uuidv4 } from "uuid"
 import { setShippingMethod } from "@modules/checkout/actions"
 import { medusaClient } from "@lib/config"
+import BillingAddress from "../billing_address"
+import { on } from "stream"
 
 const ShippingAddress = ({
   customer,
@@ -79,6 +81,22 @@ const ShippingAddress = ({
     })
   }
 
+  const isFormDataValid = (formData: { [x: string]: any }) => {
+    // Loop through each field in the formData object
+    for (const key in formData) {
+      // Check if the field is shipping_address.company
+      if (key === "shipping_address.company") {
+        continue // Skip this field
+      }
+      // Check if the field is empty
+      if (!formData[key]) {
+        return false // Return false if any field is empty
+      }
+    }
+    // Return true if all fields (except shipping_address.company) are not empty
+    return true
+  }
+
   const isValid = Object.entries(formData).every(([key, value]) => {
     // Check if the key is not "company" and if the value is not an empty string
     if (key !== "company") {
@@ -88,11 +106,38 @@ const ShippingAddress = ({
   })
 
   const [displayQuote, setDisplayQuote] = useState(false)
+  const [viewBilling, setViewBilling] = useState(false)
   const [deliveryQuote, setDeliveryQuote] = useState(0)
   const handleSubmit = () => {
     console.log("submitting for quote")
     setDisplayQuote(true)
     getDeliveryQuote()
+  }
+
+  const handleBillingToggle = () => {
+    setViewBilling(!viewBilling)
+    onChange()
+  }
+
+  const saveDeliveryQuoteId = async (
+    deliveryQuoteId: string,
+    dspOption: string
+  ) => {
+    await fetch("http://localhost:9000/doordash/deliveryQuoteId", {
+      method: "POST",
+      body: JSON.stringify({
+        quoteId: deliveryQuoteId,
+        dspOption: dspOption,
+      }),
+    })
+    console.log("INSERTED delivery quote id ")
+  }
+
+  const clearDeliveryQuoteId = async () => {
+    await fetch("http://localhost:9000/doordash/deliveryQuoteId", {
+      method: "DELETE",
+    })
+    console.log("DELETED previous quote Id's")
   }
 
   // ----------- Layo Edits ---------------
@@ -137,19 +182,33 @@ const ShippingAddress = ({
       console.log("SETTING - ", deliveryFee)
 
       // You'll be able to access the delivery quote id using this -> cart?.shipping_methods[0].data.quoteId
-      let deliveryQuoteId: string = "";
+      let deliveryQuoteId: string = ""
+      let dspOption: string = ""
       if (deliveryFee === doordashResponse.deliveryFee) {
-        deliveryQuoteId = doordashResponse.external_delivery_id;
+        deliveryQuoteId = doordashResponse.external_delivery_id
+        dspOption = "doordash"
       } else {
-        deliveryQuoteId = uberResponse.id;
+        deliveryQuoteId = uberResponse.id
+        dspOption = "uber"
       }
+      //save delivery id in db by making fetch call with body as id
+      console.log("QUOTE ID - ", deliveryQuoteId)
+      console.log("dspOption - ", dspOption)
+      clearDeliveryQuoteId()
+      saveDeliveryQuoteId(deliveryQuoteId, dspOption)
 
-      const shippingMethodId = await medusaClient.shippingOptions.list()
+      const shippingMethodId = await medusaClient.shippingOptions
+        .list()
         .then(({ shipping_options }) => {
           return shipping_options[0]["id"]
         })
       // Need to send back quoteID also
-      await setShippingMethod(shippingMethodId !== undefined ? shippingMethodId : "None", deliveryFee, deliveryQuoteId)
+      console.log("SHIPPING METHOD ID - ", shippingMethodId)
+      await setShippingMethod(
+        shippingMethodId !== undefined ? shippingMethodId : "None",
+        deliveryFee,
+        deliveryQuoteId
+      )
 
       return deliveryQuote
     } catch (error) {
@@ -249,6 +308,7 @@ const ShippingAddress = ({
               autoComplete="address-level1"
               value={formData["shipping_address.province"]}
               onChange={handleChange}
+              required
             />
           </>
         )}
@@ -259,12 +319,21 @@ const ShippingAddress = ({
             label="Same as billing address"
             name="same_as_billing"
             checked={checked}
-            onChange={onChange}
+            onChange={handleBillingToggle}
           />
         </div>
       )}
+      {viewBilling && (
+        <div>
+          <Heading level="h2" className="text-3xl-regular gap-x-4 pb-6 pt-8">
+            Billing address
+          </Heading>
+
+          <BillingAddress cart={cart} countryCode={countryCode} />
+        </div>
+      )}
       <div>
-        {isValid && checkoutOption === "Delivery" && (
+        {isFormDataValid(formData) && checkoutOption === "Delivery" && (
           <Button size="large" className="mt-6" onClick={handleSubmit}>
             Continue to payment
           </Button>

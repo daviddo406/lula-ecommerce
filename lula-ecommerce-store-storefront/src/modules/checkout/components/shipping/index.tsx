@@ -49,7 +49,7 @@ const Shipping: React.FC<ShippingProps> = ({
     // This component is not currently being used so i'm passing in 0 to prevent an error
     // ask me or test befor running this component
     //  await setShippingMethod(id)
-    await setShippingMethod(id, 0)
+    await setShippingMethod(id, 0, "")
       .then(() => {
         setIsLoading(false)
       })
