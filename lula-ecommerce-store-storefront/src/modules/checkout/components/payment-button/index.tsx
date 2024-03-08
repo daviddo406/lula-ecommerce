@@ -10,6 +10,7 @@ import React, { useState } from "react"
 import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
 import { v4 as uuidv4 } from "uuid"
+import { stringify } from "querystring"
 
 type PaymentButtonProps = {
   cart: Omit<Cart, "refundable_amount" | "refunded_total">
@@ -41,6 +42,7 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ cart }) => {
 
 const createDoordashDelivery = async (
   quoteID: string,
+  tip: number,
   cart: Omit<Cart, "refundable_amount" | "refunded_total">
 ) => {
   console.log("MAKING Doordash CALL")
@@ -57,7 +59,6 @@ const createDoordashDelivery = async (
   //     throw new Error("Could not get delivery quote ID")
   //   }
   // })
-
   const external_delivery_id = uuidv4()
   const createDordashDelivery = await fetch(
     "http://localhost:9000/doordash/createDelivery/",
@@ -65,6 +66,7 @@ const createDoordashDelivery = async (
       method: "POST",
       body: JSON.stringify({
         external_delivery_id: external_delivery_id,
+        tip: tip,
         order_fulfillment_method: "standard",
         pickup_address: "3400 Chestnut street, Philadelphia, PA, 19104",
         pickup_business_name: "TEST MEDUSA STORE",
@@ -81,7 +83,11 @@ const createDoordashDelivery = async (
   })
 }
 
-const createUberDelivery = async (quoteID: string) => {
+const createUberDelivery = async (
+  quoteID: string,
+  tip: number,
+  cart: Omit<Cart, "refundable_amount" | "refunded_total">
+) => {
   console.log("MAKING UBER CALL")
   const uberDelivery = await fetch(
     "http://localhost:9000/uber/delivery/create",
@@ -89,6 +95,7 @@ const createUberDelivery = async (quoteID: string) => {
       method: "POST",
       body: JSON.stringify({
         quote_id: quoteID,
+        tip: tip,
       }),
     }
   )
@@ -106,6 +113,8 @@ const createUberDelivery = async (quoteID: string) => {
 const completeDelivery = async (
   cart: Omit<Cart, "refundable_amount" | "refunded_total">
 ) => {
+  const tipAmount = cart.items.find((item) => item.title === "Tip")?.unit_price
+  const tip = tipAmount !== undefined ? tipAmount : 0
   const createDelivery = await fetch(
     "http://localhost:9000/doordash/deliveryQuoteId",
     {
@@ -126,12 +135,12 @@ const completeDelivery = async (
       )
       // if doordash
       if (data.result[0].dspOption == "doordash") {
-        createDoordashDelivery(data.result[0].deliveryQuoteId, cart)
+        createDoordashDelivery(data.result[0].deliveryQuoteId, tip, cart)
       }
       // if uber
       if (data.result[0].dspOption === "uber") {
         console.log("UBER")
-        createUberDelivery(data.result[0].deliveryQuoteId)
+        createUberDelivery(data.result[0].deliveryQuoteId, tip, cart)
       }
     })
 }

@@ -1,6 +1,6 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/medusa";
 import { DspRepository } from "src/repositories/dspRepository";
-import { EntityManager } from "typeorm";
+import { EntityManager, Raw } from "typeorm";
 import { dspDelivery } from "../../../models/dspDelivery";
 
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
@@ -34,6 +34,9 @@ export const DELETE = async (req: MedusaRequest, res: MedusaResponse) => {
 
   //   //   add try catch for error handling
 
-  //   const post = await dspRepo.find();
-  //   const result = await dspRepo.remove();
+  const post = await dspRepo.findBy({
+    created_at: Raw((alias) => `${alias} < NOW()`),
+  });
+  console.log("DELETE - ", post);
+  const result = await dspRepo.remove(post);
 };

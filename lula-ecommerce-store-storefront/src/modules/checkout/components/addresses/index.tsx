@@ -46,7 +46,7 @@ const Addresses = ({
 
   const [message, formAction] = useFormState(setAddresses, null)
 
-  const [deliveryOption, setDeliveryOption] = useState("")
+  const [deliveryOption, setDeliveryOption] = useState("Pickup")
   const onOptionChange = (e: ChangeEvent<HTMLInputElement>) => {
     setDeliveryOption(e.target.value)
   }
