@@ -72,7 +72,7 @@ def write_template_header(writer):
     ])
 
 skipped_count = 0
-with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
+with open('./data-import/lula-data-conversion/LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
     spamwriter = csv.writer(csvfile, delimiter=';',
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
@@ -80,7 +80,7 @@ with open('LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
 
     ##read Lula csv
     found = {}
-    with open('./lula-store-data/lula_store_item_dataV2.csv', newline='') as csvfile:
+    with open('./data-import/lula-data-conversion/lula-store-data/lula_store_item_dataV2.csv', newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter=',', quotechar='"', )
         next(reader, None)
         for ind, row in enumerate(reader):
