@@ -94,8 +94,26 @@ const createUberDelivery = async (
     {
       method: "POST",
       body: JSON.stringify({
+        pickup_name: "My Store",
+        pickup_business_name: "My Store",
+        pickup_address: "3400 Chestnut street, Philadelphia, PA 19104",
+        pickup_phone_number: "4444444444",
+        dropoff_name: `${cart.customer.first_name} ${cart.customer.last_name}`,
+        dropoff_address: `{"street_address":["${cart.shipping_address?.address_1}"],"city":"${cart.shipping_address?.city}","state":"${cart.shipping_address?.province}","zip_code":"${cart.shipping_address?.postal_code}","country":"US"}`,
+        dropoff_phone_number: cart.shipping_address?.phone,
+        manifest_items: cart.items.filter(item => item.title !== "Tip").map((item) => {
+          return {
+            name: item.title,
+            quantity: item.quantity,
+          }
+        }),
         quote_id: quoteID,
         tip: tip,
+        test_specifications: {
+          robo_courier_specification: {
+            mode: "auto",
+          },
+        }
       }),
     }
   )
@@ -107,7 +125,14 @@ const createUberDelivery = async (
     })
     .then((data) => {
       console.log("UBER DATA - ", data)
+      return data
     })
+  await fetch("http://localhost:9000/doordash/updateDeliveryRecord", {
+    method: "POST",
+    body: JSON.stringify({
+      deliveryId: uberDelivery.id,
+    }),
+  })
 }
 
 const completeDelivery = async (

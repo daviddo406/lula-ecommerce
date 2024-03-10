@@ -24,6 +24,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const post = dspRepo.create();
   post.deliveryQuoteId = reqBody.quoteId;
   post.dspOption = reqBody.dspOption;
+  post.deliveryId = "";
   const result = await dspRepo.save(post);
 };
 

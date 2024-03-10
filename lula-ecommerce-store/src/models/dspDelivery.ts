@@ -10,6 +10,9 @@ export class dspDelivery extends BaseEntity {
   @Column({ type: "varchar" })
   dspOption: string | null;
 
+  @Column({ type: "varchar" })
+  deliveryId: string | null;
+
   @BeforeInsert()
   private beforeInsert(): void {
     this.id = generateEntityId(this.id, "dspDelivery");

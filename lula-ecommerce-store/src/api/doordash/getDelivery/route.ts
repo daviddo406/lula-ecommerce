@@ -5,7 +5,7 @@ import {
 } from "@doordash/sdk";
 import { MedusaRequest, MedusaResponse } from "@medusajs/medusa";
   
-export async function GET(req: MedusaRequest, res: MedusaResponse) {
+export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const client = new DoorDashClient({
       developer_id: String(process.env.DEVELOPER_ID),
       key_id: String(process.env.KEY_ID),
