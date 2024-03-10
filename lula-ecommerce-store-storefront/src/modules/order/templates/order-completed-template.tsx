@@ -1,7 +1,7 @@
 "use client";
 import { Order } from "@medusajs/medusa"
 import { Heading } from "@medusajs/ui"
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import "./driverObject.css" 
 import GoogleMapReact from 'google-map-react';
 import CartTotals from "@modules/common/components/cart-totals"
@@ -35,6 +35,47 @@ export default function OrderCompletedTemplate({
   const [driverLocation, setDriverLocation] = useState({center: {lat: 10.99835602, lng: 77.01502627}}) 
 
   // might just end up using an object to store everything so I'm not setting a lot.
+
+  
+  useEffect(() => {
+    
+    //  make fetch request to check if user signed in 
+    getDeliveryID();
+    console.log('In use effect')
+
+    // Call fetch request here
+  
+    }, []);
+
+
+
+
+  async function getDeliveryID(){
+
+
+    let endpoint = "http://localhost:9000/doordash/deliveryQuoteId";
+
+  try {
+
+      let response = await fetch(endpoint, {
+          method: 'GET',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+         
+          
+      });
+
+      let data = await response.json()
+
+      console.log(data, "DELIVERY ID OBJECT")
+      
+  } catch (error) {
+      
+  }
+
+
+  }
 
 
   // let interval;
