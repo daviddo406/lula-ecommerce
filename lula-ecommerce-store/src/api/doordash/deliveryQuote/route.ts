@@ -19,7 +19,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     .then((response: DoorDashResponse<DeliveryResponse>) => {
       // do something
       console.log("Delivery Fee - ", response.data.fee);
-      res.json({ deliveryFee: response.data.fee });
+      res.json({ deliveryFee: response.data.fee, external_delivery_id: response.data.external_delivery_id});
     })
     .catch((err: any) => {
       // handle error

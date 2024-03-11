@@ -9,6 +9,8 @@ import { placeOrder } from "@modules/checkout/actions"
 import React, { useState } from "react"
 import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
+import { v4 as uuidv4 } from "uuid"
+import { stringify } from "querystring"
 
 type PaymentButtonProps = {
   cart: Omit<Cart, "refundable_amount" | "refunded_total">
@@ -30,12 +32,117 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ cart }) => {
     case "stripe":
       return <StripePaymentButton notReady={notReady} cart={cart} />
     case "manual":
-      return <ManualTestPaymentButton notReady={notReady} />
+      return <ManualTestPaymentButton notReady={notReady} cart={cart} />
     case "paypal":
       return <PayPalPaymentButton notReady={notReady} cart={cart} />
     default:
       return <Button disabled>Select a payment method</Button>
   }
+}
+
+const createDoordashDelivery = async (
+  quoteID: string,
+  tip: number,
+  cart: Omit<Cart, "refundable_amount" | "refunded_total">
+) => {
+  console.log("MAKING Doordash CALL")
+  // const acceptDordashQuote = await fetch(
+  //   "http://localhost:9000/doordash/acceptQuote/",
+  //   {
+  //     method: "POST",
+  //     body: JSON.stringify({
+  //       external_delivery_id: quoteID,
+  //     }),
+  //   }
+  // ).then((res) => {
+  //   if (!res.ok) {
+  //     throw new Error("Could not get delivery quote ID")
+  //   }
+  // })
+  const external_delivery_id = uuidv4()
+  const createDordashDelivery = await fetch(
+    "http://localhost:9000/doordash/createDelivery/",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        external_delivery_id: external_delivery_id,
+        tip: tip,
+        order_fulfillment_method: "standard",
+        pickup_address: "3400 Chestnut street, Philadelphia, PA, 19104",
+        pickup_business_name: "TEST MEDUSA STORE",
+        dropoff_address: `${cart.shipping_address?.address_1}, ${cart.shipping_address?.city}, ${cart.shipping_address?.province}, ${cart.shipping_address?.postal_code}`,
+        dropoff_phone_number: "+1" + cart.shipping_address?.phone,
+        dropoff_contact_given_name: cart.customer.first_name,
+        dropoff_contact_family_name: cart.customer.last_name,
+      }),
+    }
+  ).then((res) => {
+    if (!res.ok) {
+      throw new Error("Could not get delivery quote ID")
+    }
+  })
+}
+
+const createUberDelivery = async (
+  quoteID: string,
+  tip: number,
+  cart: Omit<Cart, "refundable_amount" | "refunded_total">
+) => {
+  console.log("MAKING UBER CALL")
+  const uberDelivery = await fetch(
+    "http://localhost:9000/uber/delivery/create",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        quote_id: quoteID,
+        tip: tip,
+      }),
+    }
+  )
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error("Could not get delivery quote ID")
+      }
+      return res.json()
+    })
+    .then((data) => {
+      console.log("UBER DATA - ", data)
+    })
+}
+
+const completeDelivery = async (
+  cart: Omit<Cart, "refundable_amount" | "refunded_total">
+) => {
+  const tipAmount = cart.items.find((item) => item.title === "Tip")?.unit_price
+  const tip = tipAmount !== undefined ? tipAmount : 0
+  const createDelivery = await fetch(
+    "http://localhost:9000/doordash/deliveryQuoteId",
+    {
+      method: "GET",
+    }
+  )
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error("Could not get delivery quote ID")
+      }
+      return res.json()
+    })
+    .then((data) => {
+      console.log(
+        "TESTTT - ",
+        data.result[0].dspOption,
+        data.result[0].deliveryQuoteId
+      )
+      // if doordash
+      if (data.result[0].dspOption == "doordash") {
+        createDoordashDelivery(data.result[0].deliveryQuoteId, tip, cart)
+      }
+      // if uber
+      if (data.result[0].dspOption === "uber") {
+        console.log("UBER")
+        createUberDelivery(data.result[0].deliveryQuoteId, tip, cart)
+      }
+    })
 }
 
 const StripePaymentButton = ({
@@ -49,10 +156,14 @@ const StripePaymentButton = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const onPaymentCompleted = async () => {
-    await placeOrder().catch(() => {
-      setErrorMessage("An error occurred, please try again.")
-      setSubmitting(false)
-    })
+    await placeOrder()
+      .then(async () => {
+        completeDelivery(cart)
+      })
+      .catch(() => {
+        setErrorMessage("An error occurred, please try again.")
+        setSubmitting(false)
+      })
   }
 
   const stripe = useStripe()
@@ -145,10 +256,14 @@ const PayPalPaymentButton = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const onPaymentCompleted = async () => {
-    await placeOrder().catch(() => {
-      setErrorMessage("An error occurred, please try again.")
-      setSubmitting(false)
-    })
+    await placeOrder()
+      .then(async () => {
+        completeDelivery(cart)
+      })
+      .catch(() => {
+        setErrorMessage("An error occurred, please try again.")
+        setSubmitting(false)
+      })
   }
 
   const session = cart.payment_session as PaymentSession
@@ -193,15 +308,25 @@ const PayPalPaymentButton = ({
   }
 }
 
-const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
+const ManualTestPaymentButton = ({
+  notReady,
+  cart,
+}: {
+  notReady: boolean
+  cart: Omit<Cart, "refundable_amount" | "refunded_total">
+}) => {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const onPaymentCompleted = async () => {
-    await placeOrder().catch((err) => {
-      setErrorMessage(err.toString())
-      setSubmitting(false)
-    })
+    await placeOrder()
+      .then(async () => {
+        completeDelivery(cart)
+      })
+      .catch((err) => {
+        setErrorMessage(err.toString())
+        setSubmitting(false)
+      })
   }
 
   const handlePayment = () => {
