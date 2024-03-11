@@ -10,21 +10,14 @@ import Items from "@modules/order/components/items"
 import OrderDetails from "@modules/order/components/order-details"
 import ShippingDetails from "@modules/order/components/shipping-details"
 import PaymentDetails from "@modules/order/components/payment-details"
+import { retrieveOrder } from "@lib/data"
+import { notFound } from "next/navigation"
 
 type OrderCompletedTemplateProps = {
   order: Order
 }
 
-const DriverLocaton = ({ lat, lng, text }) =>   
-
-<div className="car">
-<div className="car-body"></div>
-<div className="wheel left"></div>
-<div className="wheel right"></div>
-</div>
-;
-
-export default function OrderCompletedTemplate({
+export default async function OrderCompletedTemplate({
   order,
 }: OrderCompletedTemplateProps) {
 
@@ -84,6 +77,12 @@ export default function OrderCompletedTemplate({
 
 
   // fetch status here
+
+  const orderWithTip = await retrieveOrder(order.id)
+
+  if (!orderWithTip) {
+    return notFound()
+  }
 
   return (
     <div className="py-6 min-h-[calc(100vh-64px)]">
@@ -147,7 +146,7 @@ export default function OrderCompletedTemplate({
             Summary
           </Heading>
           <Items items={order.items} region={order.region} />
-          <CartTotals data={order} />
+          <CartTotals data={orderWithTip} />
           <ShippingDetails order={order} />
           {/* <PaymentDetails order={order} /> */}
           <Help />

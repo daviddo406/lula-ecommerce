@@ -151,17 +151,24 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
   } catch (error: any) {
     return error.toString()
   }
-
-  redirect("/checkout?step=delivery")
+  
+  redirect("/checkout?step=payment")
 }
 
-export async function setShippingMethod(shippingMethodId: string) {
+export async function setShippingMethod(
+  shippingMethodId: string,
+  deliveryFee: number,
+  deliveryQuoteId: string
+) {
+  console.log("SETTING SHIPPING METHOD")
   const cartId = cookies().get("_medusa_cart_id")?.value
 
   if (!cartId) throw new Error("No cartId cookie found")
 
   try {
-    await addShippingMethod({ cartId, shippingMethodId })
+    console.log("DELIVERY FEE - ", deliveryFee)
+    const data = { quoteId: deliveryQuoteId, price: deliveryFee }
+    await addShippingMethod({ cartId, shippingMethodId, data })
     revalidateTag("cart")
   } catch (error: any) {
     throw error

@@ -4,7 +4,12 @@ import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
 import AddressSelect from "../address-select"
 import CountrySelect from "../country-select"
-import { Container } from "@medusajs/ui"
+import { Button, Container, Heading } from "@medusajs/ui"
+import { v4 as uuidv4 } from "uuid"
+import { setShippingMethod } from "@modules/checkout/actions"
+import { medusaClient } from "@lib/config"
+import BillingAddress from "../billing_address"
+import { on } from "stream"
 
 const ShippingAddress = ({
   customer,
@@ -12,12 +17,14 @@ const ShippingAddress = ({
   checked,
   onChange,
   countryCode,
+  checkoutOption,
 }: {
   customer: Omit<Customer, "password_hash"> | null
   cart: Omit<Cart, "refundable_amount" | "refunded_total"> | null
   checked: boolean
   onChange: () => void
   countryCode: string
+  checkoutOption: string
 }) => {
   const [formData, setFormData] = useState({
     "shipping_address.first_name": cart?.shipping_address?.first_name || "",
@@ -74,6 +81,145 @@ const ShippingAddress = ({
     })
   }
 
+  const isFormDataValid = (formData: { [x: string]: any }) => {
+    // Loop through each field in the formData object
+    for (const key in formData) {
+      // Check if the field is shipping_address.company
+      if (key === "shipping_address.company") {
+        continue // Skip this field
+      }
+      // Check if the field is empty
+      if (!formData[key]) {
+        return false // Return false if any field is empty
+      }
+    }
+    // Return true if all fields (except shipping_address.company) are not empty
+    return true
+  }
+
+  const isValid = Object.entries(formData).every(([key, value]) => {
+    // Check if the key is not "company" and if the value is not an empty string
+    if (key !== "company") {
+      return value !== ""
+    }
+    return true // Always return true for the "company" key
+  })
+
+  const [displayQuote, setDisplayQuote] = useState(false)
+  const [viewBilling, setViewBilling] = useState(false)
+  const [deliveryQuote, setDeliveryQuote] = useState(0)
+  const handleSubmit = () => {
+    console.log("submitting for quote")
+    setDisplayQuote(true)
+    getDeliveryQuote()
+  }
+
+  const handleBillingToggle = () => {
+    setViewBilling(!viewBilling)
+    onChange()
+  }
+
+  const saveDeliveryQuoteId = async (
+    deliveryQuoteId: string,
+    dspOption: string
+  ) => {
+    await fetch("http://localhost:9000/doordash/deliveryQuoteId", {
+      method: "POST",
+      body: JSON.stringify({
+        quoteId: deliveryQuoteId,
+        dspOption: dspOption,
+      }),
+    })
+    console.log("INSERTED delivery quote id ")
+  }
+
+  const clearDeliveryQuoteId = async (deliveryQuoteId: string, dspOption: string) => {
+    await fetch("http://localhost:9000/doordash/deliveryQuoteId", {
+      method: "DELETE",
+    })
+    .then((response) => {
+      if (response.ok) {
+        saveDeliveryQuoteId(deliveryQuoteId, dspOption)
+      }
+    })
+    console.log("DELETED previous quote Id's")
+  }
+
+  // ----------- Layo Edits ---------------
+  // Needs better error checking and code cleanUp
+  const getDeliveryQuote = async () => {
+    try {
+      const doordashQuote = await fetch(
+        "http://localhost:9000/doordash/deliveryQuote",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            external_delivery_id: uuidv4(),
+            // Get store info from admin?
+            pickup_address: "3400 Chestnut street, Philadelphia, PA, 19104",
+            pickup_phone_number: "+12156886986",
+            dropoff_address: formData["shipping_address.address_1"],
+            dropoff_phone_number: "+1" + formData["shipping_address.phone"],
+          }),
+        }
+      )
+      console.log("Doordash done")
+      const doordashResponse = await doordashQuote.json()
+      console.log("doordash - ", doordashResponse, doordashResponse.deliveryFee)
+
+      // Layo - need to send actual delivery paramets to Uber request
+      const UberQuote = await fetch("http://localhost:9000/uber/quote", {
+        method: "POST",
+        body: JSON.stringify({
+          pickup_address: "3400 Chestnut street, Philadelphia, PA 19104",
+          dropoff_address: `{"street_address":["${formData["shipping_address.address_1"]}"],"city":"${formData["shipping_address.city"]}","state":"${formData["shipping_address.province"]}","zip_code":"${formData["shipping_address.postal_code"]}","country":"US"}`,
+        }),
+      })
+
+      console.log("Uber done")
+      const uberResponse = await UberQuote.json()
+      console.log("uber - ", uberResponse, uberResponse.fee)
+
+      const deliveryFee: number = Math.min(
+        doordashResponse.deliveryFee,
+        uberResponse.fee
+      )
+      console.log("SETTING - ", deliveryFee)
+
+      // You'll be able to access the delivery quote id using this -> cart?.shipping_methods[0].data.quoteId
+      let deliveryQuoteId: string = ""
+      let dspOption: string = ""
+      if (deliveryFee === doordashResponse.deliveryFee) {
+        deliveryQuoteId = doordashResponse.external_delivery_id
+        dspOption = "doordash"
+      } else {
+        deliveryQuoteId = uberResponse.id
+        dspOption = "uber"
+      }
+      //save delivery id in db by making fetch call with body as id
+      console.log("QUOTE ID - ", deliveryQuoteId)
+      console.log("dspOption - ", dspOption)
+      clearDeliveryQuoteId(deliveryQuoteId, dspOption)
+
+      const shippingMethodId = await medusaClient.shippingOptions
+        .list()
+        .then(({ shipping_options }) => {
+          return shipping_options[0]["id"]
+        })
+      // Need to send back quoteID also
+      console.log("SHIPPING METHOD ID - ", shippingMethodId)
+      await setShippingMethod(
+        shippingMethodId !== undefined ? shippingMethodId : "None",
+        deliveryFee,
+        deliveryQuoteId
+      )
+
+      return deliveryQuote
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   return (
     <>
       {customer && (addressesInRegion?.length || 0) > 0 && (
@@ -102,62 +248,6 @@ const ShippingAddress = ({
           required
         />
         <Input
-          label="Address"
-          name="shipping_address.address_1"
-          autoComplete="address-line1"
-          value={formData["shipping_address.address_1"]}
-          onChange={handleChange}
-          required
-        />
-        <Input
-          label="Company"
-          name="shipping_address.company"
-          value={formData["shipping_address.company"]}
-          onChange={handleChange}
-          autoComplete="organization"
-        />
-        <Input
-          label="Postal code"
-          name="shipping_address.postal_code"
-          autoComplete="postal-code"
-          value={formData["shipping_address.postal_code"]}
-          onChange={handleChange}
-          required
-        />
-        <Input
-          label="City"
-          name="shipping_address.city"
-          autoComplete="address-level2"
-          value={formData["shipping_address.city"]}
-          onChange={handleChange}
-          required
-        />
-        <CountrySelect
-          name="shipping_address.country_code"
-          autoComplete="country"
-          region={cart?.region}
-          value={formData["shipping_address.country_code"]}
-          onChange={handleChange}
-          required
-        />
-        <Input
-          label="State / Province"
-          name="shipping_address.province"
-          autoComplete="address-level1"
-          value={formData["shipping_address.province"]}
-          onChange={handleChange}
-        />
-      </div>
-      <div className="my-8">
-        <Checkbox
-          label="Same as billing address"
-          name="same_as_billing"
-          checked={checked}
-          onChange={onChange}
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <Input
           label="Email"
           name="email"
           type="email"
@@ -173,7 +263,85 @@ const ShippingAddress = ({
           autoComplete="tel"
           value={formData["shipping_address.phone"]}
           onChange={handleChange}
+          required
         />
+        {checkoutOption == "Delivery" && (
+          <>
+            <Input
+              label="Address"
+              name="shipping_address.address_1"
+              autoComplete="address-line1"
+              value={formData["shipping_address.address_1"]}
+              onChange={handleChange}
+              required
+            />
+            <Input
+              label="Company"
+              name="shipping_address.company"
+              value={formData["shipping_address.company"]}
+              onChange={handleChange}
+              autoComplete="organization"
+            />
+            <Input
+              label="Postal code"
+              name="shipping_address.postal_code"
+              autoComplete="postal-code"
+              value={formData["shipping_address.postal_code"]}
+              onChange={handleChange}
+              required
+            />
+            <Input
+              label="City"
+              name="shipping_address.city"
+              autoComplete="address-level2"
+              value={formData["shipping_address.city"]}
+              onChange={handleChange}
+              required
+            />
+            <CountrySelect
+              name="shipping_address.country_code"
+              autoComplete="country"
+              region={cart?.region}
+              value={formData["shipping_address.country_code"]}
+              onChange={handleChange}
+              required
+            />
+            <Input
+              label="State / Province"
+              name="shipping_address.province"
+              autoComplete="address-level1"
+              value={formData["shipping_address.province"]}
+              onChange={handleChange}
+              required
+            />
+          </>
+        )}
+      </div>
+      {checkoutOption === "Delivery" && (
+        <div className="my-8">
+          <Checkbox
+            label="Same as billing address"
+            name="same_as_billing"
+            checked={checked}
+            onChange={handleBillingToggle}
+          />
+        </div>
+      )}
+      {viewBilling && (
+        <div>
+          <Heading level="h2" className="text-3xl-regular gap-x-4 pb-6 pt-8">
+            Billing address
+          </Heading>
+
+          <BillingAddress cart={cart} countryCode={countryCode} />
+        </div>
+      )}
+      <div>
+        {isFormDataValid(formData) && checkoutOption === "Delivery" && (
+          <Button size="large" className="mt-6" onClick={handleSubmit}>
+            Continue to payment
+          </Button>
+        )}
       </div>
     </>
   )

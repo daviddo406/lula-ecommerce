@@ -4,7 +4,6 @@ import {
   DoorDashResponse,
 } from "@doordash/sdk";
 import { MedusaRequest, MedusaResponse } from "@medusajs/medusa";
-import { json } from "body-parser";
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   const client = new DoorDashClient({
@@ -20,7 +19,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     .then((response: DoorDashResponse<DeliveryResponse>) => {
       // do something
       console.log("Delivery Fee - ", response.data.fee);
-      res.json({ deliveryFee: response.data.fee });
+      res.json({ deliveryFee: response.data.fee, external_delivery_id: response.data.external_delivery_id});
     })
     .catch((err: any) => {
       // handle error

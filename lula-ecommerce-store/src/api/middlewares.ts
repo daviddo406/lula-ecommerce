@@ -59,5 +59,14 @@ export const config: MiddlewaresConfig = {
         }),
       ],
     },
+    {
+      matcher: "/cart/*",
+      middlewares: [
+        cors({
+          origin: "*",
+          credentials: true,
+        }),
+      ],
+    }
   ],
 };
