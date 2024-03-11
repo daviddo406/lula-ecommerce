@@ -12,6 +12,36 @@ Git
 PostgresSql
 Next.js
 
+### Database Set-up (REQUIRED)
+Login as postgres user:
+```
+psql -U postgres
+```
+
+Create a database as postgres user, named medusa-nuSM:
+```
+create database "medusa-nuSM";
+```
+
+Run this cmd to copy database schema:
+```
+psql -U postgres -W -d medusa-nuSM -f medusa-copy.sql
+```
+
+***IF POSTGRES WAS SET UP WITH A PASSWORD, YOU MUST FOLLOW THESE STEPS***
+Go to lula-ecommerce-store/.env
+
+Looking at the database url, we need to add your password.
+This is what it should look like now:
+```
+DATABASE_URL=postgres://postgres@localhost/medusa-nuSM
+```
+
+add your PASSWORD as:
+```
+DATABASE_URL=postgres://postgres:PASSWORD@localhost/medusa-nuSM
+```
+
 ### Starting Medusa Backend
 ```
 cd lula-ecommerce-store
