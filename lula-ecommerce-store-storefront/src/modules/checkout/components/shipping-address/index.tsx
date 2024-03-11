@@ -133,9 +133,14 @@ const ShippingAddress = ({
     console.log("INSERTED delivery quote id ")
   }
 
-  const clearDeliveryQuoteId = async () => {
+  const clearDeliveryQuoteId = async (deliveryQuoteId: string, dspOption: string) => {
     await fetch("http://localhost:9000/doordash/deliveryQuoteId", {
       method: "DELETE",
+    })
+    .then((response) => {
+      if (response.ok) {
+        saveDeliveryQuoteId(deliveryQuoteId, dspOption)
+      }
     })
     console.log("DELETED previous quote Id's")
   }
@@ -194,8 +199,7 @@ const ShippingAddress = ({
       //save delivery id in db by making fetch call with body as id
       console.log("QUOTE ID - ", deliveryQuoteId)
       console.log("dspOption - ", dspOption)
-      clearDeliveryQuoteId()
-      saveDeliveryQuoteId(deliveryQuoteId, dspOption)
+      clearDeliveryQuoteId(deliveryQuoteId, dspOption)
 
       const shippingMethodId = await medusaClient.shippingOptions
         .list()

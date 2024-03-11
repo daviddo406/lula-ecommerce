@@ -40,4 +40,5 @@ export const DELETE = async (req: MedusaRequest, res: MedusaResponse) => {
   });
   console.log("DELETE - ", post);
   const result = await dspRepo.remove(post);
+  return res.json()
 };
