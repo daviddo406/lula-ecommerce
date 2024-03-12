@@ -23,14 +23,14 @@ export default function ProductRail({
           View all
         </InteractiveLink>
       </div>
-      <ul className="grid grid-cols-2 small:grid-cols-3 gap-x-6 gap-y-24 small:gap-y-36">
-        {products &&
-          products.map((product) => (
-            <li key={product.id}>
-              <ProductPreview isFeatured {...product} />
-            </li>
-          ))}
+      {/* Adjusted to display 5 items in a row with `grid-cols-5` */}
+      <ul className="grid grid-cols-5 gap-x-6 gap-y-12">
+        {products.slice(0, 5).map((product) => ( // Also ensure only up to 5 products are displayed
+          <li key={product.id}>
+            <ProductPreview isFeatured {...product} />
+          </li>
+        ))}
       </ul>
     </div>
-  )
+  );
 }

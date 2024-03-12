@@ -36,7 +36,7 @@
     "cypress/integration/product.spec.js",
     "cypress/plugins/index.js",
     ".next/types/**/*.ts"
-  ],
+, "src/modules/layout/components/delivery-toggle/deliveryToggle.client.js"  ],
   "exclude": [
     "node_modules",
     ".next",
