@@ -7,28 +7,23 @@ import OrderDetails from "@modules/order/components/order-details"
 import ShippingDetails from "@modules/order/components/shipping-details"
 import { retrieveOrder } from "@lib/data"
 import { notFound } from "next/navigation"
-import DSP from "../components/DSP-delivery-details";
+import DSPDeliveryDetails from "../components/dsp-delivery-details"
+import PaymentDetails from "../components/payment-details"
+import Divider from "@modules/common/components/divider"
 
 type OrderCompletedTemplateProps = {
   order: Order
 }
 
-
-
 export default async function OrderCompletedTemplate({
   order,
 }: OrderCompletedTemplateProps) {
-  // const isOnboarding = cookies().get("_medusa_onboarding")?.value === "true"
-
-
-
   const orderWithTip = await retrieveOrder(order.id)
 
   if (!orderWithTip) {
     return notFound()
   }
 
- 
   return (
     <div className="py-6 min-h-[calc(100vh-64px)]">
       <div className="content-container flex flex-col justify-center items-center gap-y-10 max-w-4xl h-full w-full">
@@ -40,23 +35,16 @@ export default async function OrderCompletedTemplate({
             <span>Thank you!</span>
             <span>Your order was placed successfully.</span>
           </Heading>
-
-          <DSP />
-
-
-        <div>
-        <OrderDetails order={order} />
-
-        </div>
-          
+          <OrderDetails order={order} />
+          <Divider />
+          <DSPDeliveryDetails />
           <Heading level="h2" className="flex flex-row text-3xl-regular">
-            Summary
+            Order Summary
           </Heading>
           <Items items={order.items} region={order.region} />
           <CartTotals data={orderWithTip} />
           <ShippingDetails order={order} />
-          {/* <PaymentDetails order={order} /> */}
-          <Help />
+          <PaymentDetails order={order} />
         </div>
       </div>
     </div>

@@ -15,7 +15,7 @@ const Tip = ({
   const [noTip, setNoTip] = useState<boolean>(false)
   const router = useRouter()
 
-  const handlePreTipValueChange = async (value: string) => {
+  const handlePreTipValueChange = (value: string) => {
     if (value === "No Tip") {
       setPreTip(0)
       setNoTip(true)
