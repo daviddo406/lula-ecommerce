@@ -32,7 +32,8 @@
     "@medusajs/event-bus-local": "^1.9.7",
     "@medusajs/event-bus-redis": "^1.8.10",
     "@medusajs/file-local": "^1.0.2",
-    "@medusajs/medusa": "1.20",
+    "@medusajs/medusa": "1.20.0",
+    "@react-google-maps/api": "^2.19.3",
     "@tanstack/react-query": "4.22.0",
     "awilix": "^8.0.1",
     "axios": "^1.6.7",
@@ -50,7 +51,8 @@
     "medusa-plugin-sendgrid-typescript": "^2.1.0",
     "medusa-plugin-twilio-sms": "^1.2.8",
     "prism-react-renderer": "^2.0.4",
-    "typeorm": "^0.3.16"
+    "typeorm": "^0.3.16",
+    "use-places-autocomplete": "^4.0.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.14.3",

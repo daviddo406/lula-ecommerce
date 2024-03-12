@@ -7,6 +7,7 @@ export class DspDelivery1709564553057 implements MigrationInterface {
             "id" character varying NOT NULL,
             "deliveryQuoteId" character varying NOT NULL,
             "dspOption" character varying NOT NULL,
+            "deliveryId" character varying NULL,
             "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
             "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
         )`

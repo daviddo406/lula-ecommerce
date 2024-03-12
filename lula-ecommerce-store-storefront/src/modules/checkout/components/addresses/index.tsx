@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { Cart, Customer } from "@medusajs/medusa"
 import { CheckCircleSolid } from "@medusajs/icons"
-import { Button, Heading, Text, useToggleState } from "@medusajs/ui"
+import { Button, Heading, Tabs, Text, clx, useToggleState } from "@medusajs/ui"
 
 import Divider from "@modules/common/components/divider"
 import Spinner from "@modules/common/icons/spinner"
@@ -11,12 +11,11 @@ import Spinner from "@modules/common/icons/spinner"
 import BillingAddress from "../billing_address"
 import ShippingAddress from "../shipping-address"
 import { setAddresses, setShippingMethod } from "../../actions"
-import { SubmitButton } from "../submit-button"
 import { useFormState } from "react-dom"
 import ErrorMessage from "../error-message"
 import compareAddresses from "@lib/util/compare-addresses"
 
-import { ChangeEvent, useState } from "react"
+import { useState } from "react"
 import { medusaClient } from "@lib/config"
 
 const Addresses = ({
@@ -46,9 +45,9 @@ const Addresses = ({
 
   const [message, formAction] = useFormState(setAddresses, null)
 
-  const [deliveryOption, setDeliveryOption] = useState("Pickup")
-  const onOptionChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setDeliveryOption(e.target.value)
+  const [deliveryOption, setDeliveryOption] = useState("Delivery")
+  const handleDeliveryOptionChange = (value: string) => {
+    setDeliveryOption(value)
   }
 
   const handleSubmit = async () => {
@@ -71,7 +70,7 @@ const Addresses = ({
           level="h2"
           className="flex flex-row text-3xl-regular gap-x-2 items-baseline"
         >
-          Contact Info
+          Delivery Info
           {!isOpen && <CheckCircleSolid />}
         </Heading>
         {!isOpen && cart?.shipping_address && (
@@ -87,28 +86,35 @@ const Addresses = ({
       </div>
       {isOpen ? (
         <form action={formAction}>
-          <div>
-            <label>
-              <input
-                type="radio"
-                name="deliveryOption"
-                value="Pickup"
-                checked={deliveryOption === "Pickup"}
-                onChange={onOptionChange}
-              />
-              Pickup
-            </label>
-            &nbsp;&nbsp;&nbsp;
-            <label>
-              <input
-                type="radio"
-                name="deliveryOption"
-                value="Delivery"
-                checked={deliveryOption === "Delivery"}
-                onChange={onOptionChange}
-              />
-              Delivery
-            </label>
+          <div className="flex content-center justify-center mb-3">
+            <Tabs onValueChange={handleDeliveryOptionChange} defaultValue={deliveryOption}>
+              <Tabs.List>
+              <Tabs.Trigger 
+                  className={clx(
+                    "border-ui-border-base bg-ui-bg-subtle border px-5",
+                    {
+                      "border-ui-border-interactive": deliveryOption === "Delivery",
+                      "hover:shadow-elevation-card-rest transition-shadow ease-in-out duration-150":
+                        deliveryOption !== "Delivery",
+                    })}
+                    value="Delivery"
+                >
+                  Delivery
+                </Tabs.Trigger>
+                <Tabs.Trigger 
+                  className={clx(
+                    "border-ui-border-base bg-ui-bg-subtle border px-5",
+                    {
+                      "border-ui-border-interactive": deliveryOption === "Pickup",
+                      "hover:shadow-elevation-card-rest transition-shadow ease-in-out duration-150":
+                        deliveryOption !== "Pickup",
+                    })}
+                    value="Pickup"
+                >
+                  Pick Up
+                </Tabs.Trigger>
+              </Tabs.List>
+            </Tabs>
           </div>
           <div className="pb-8">
             <ShippingAddress

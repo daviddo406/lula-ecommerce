@@ -24,6 +24,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const post = dspRepo.create();
   post.deliveryQuoteId = reqBody.quoteId;
   post.dspOption = reqBody.dspOption;
+  post.deliveryId = "";
   const result = await dspRepo.save(post);
 };
 
@@ -39,4 +40,5 @@ export const DELETE = async (req: MedusaRequest, res: MedusaResponse) => {
   });
   console.log("DELETE - ", post);
   const result = await dspRepo.remove(post);
+  return res.json()
 };

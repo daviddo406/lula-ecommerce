@@ -96,10 +96,12 @@ const CartTotals: React.FC<CartTotalsProps> = ({ data }) => {
             </span>
           </div>
         )}
-        <div className="flex items-center justify-between">
-          <span>Delivery Fee</span>
-          <span>{getAmount(shipping_total)}</span>
-        </div>
+        {!!shipping_total && (
+          <div className="flex items-center justify-between">
+            <span>Delivery Fee</span>
+            <span>{getAmount(shipping_total)}</span>
+          </div>
+        )}
         {!!getTip() && (
           <div className="flex items-center justify-between">
             <span>Delivery Tip</span>

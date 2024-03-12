@@ -9,7 +9,6 @@ import { v4 as uuidv4 } from "uuid"
 import { setShippingMethod } from "@modules/checkout/actions"
 import { medusaClient } from "@lib/config"
 import BillingAddress from "../billing_address"
-import { on } from "stream"
 
 const ShippingAddress = ({
   customer,
@@ -105,12 +104,11 @@ const ShippingAddress = ({
     return true // Always return true for the "company" key
   })
 
-  const [displayQuote, setDisplayQuote] = useState(false)
+
   const [viewBilling, setViewBilling] = useState(false)
   const [deliveryQuote, setDeliveryQuote] = useState(0)
   const handleSubmit = () => {
     console.log("submitting for quote")
-    setDisplayQuote(true)
     getDeliveryQuote()
   }
 
@@ -133,9 +131,14 @@ const ShippingAddress = ({
     console.log("INSERTED delivery quote id ")
   }
 
-  const clearDeliveryQuoteId = async () => {
+  const clearDeliveryQuoteId = async (deliveryQuoteId: string, dspOption: string) => {
     await fetch("http://localhost:9000/doordash/deliveryQuoteId", {
       method: "DELETE",
+    })
+    .then((response) => {
+      if (response.ok) {
+        saveDeliveryQuoteId(deliveryQuoteId, dspOption)
+      }
     })
     console.log("DELETED previous quote Id's")
   }
@@ -194,8 +197,7 @@ const ShippingAddress = ({
       //save delivery id in db by making fetch call with body as id
       console.log("QUOTE ID - ", deliveryQuoteId)
       console.log("dspOption - ", dspOption)
-      clearDeliveryQuoteId()
-      saveDeliveryQuoteId(deliveryQuoteId, dspOption)
+      clearDeliveryQuoteId(deliveryQuoteId, dspOption)
 
       const shippingMethodId = await medusaClient.shippingOptions
         .list()
@@ -218,7 +220,7 @@ const ShippingAddress = ({
 
   return (
     <>
-      {customer && (addressesInRegion?.length || 0) > 0 && (
+      {customer && (checkoutOption === "Delivery") && (addressesInRegion?.length || 0) > 0 && (
         <Container className="mb-6 flex flex-col gap-y-4 p-5">
           <p className="text-small-regular">
             {`Hi ${customer.first_name}, do you want to use one of your saved addresses?`}
