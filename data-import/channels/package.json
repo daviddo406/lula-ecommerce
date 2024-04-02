@@ -1,0 +1,6 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@medusajs/medusa-js": "^6.1.7"
+  }
+}

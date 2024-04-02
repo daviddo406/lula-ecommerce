@@ -1,0 +1,21 @@
+
+Collection needed
+Sales channel needed
+For products
+
+Organizing products by store
+    allow for duplicate titles, can distinguish by handle
+    Products should have tags to their store
+        can be filtered in medusa admin page
+
+    Sales-channel id
+
+How should we handle collections?
+    should be categorical
+    Frontend has to handle which collection to show per store  
+        can do meta tags
+    cant do per store
+
+
+    
+for pictures to load, must add to next.config.js as image source
