@@ -5,3 +5,4 @@ lula-ecommerce-store/.env
 lula-ecommerce-store/.env
 lula-ecommerce-store-storefront/yarn.lock
 __pycache__
+.DS_Store
