@@ -12,8 +12,6 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     signing_secret: String(process.env.SIGNING_SECRET),
   });
 
-  console.log(req.body);
-
   client
     .deliveryQuote(req.body)
     .then((response: DoorDashResponse<DeliveryResponse>) => {

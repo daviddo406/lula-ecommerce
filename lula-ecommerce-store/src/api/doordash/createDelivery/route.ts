@@ -12,14 +12,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     signing_secret: String(process.env.SIGNING_SECRET),
   });
 
-  console.log(req.body);
-
   client
     .createDelivery(req.body)
     .then((response: DoorDashResponse<DeliveryResponse>) => {
-      // do something
       console.log("Tracking URL - ", response.data.tracking_url);
-      res.json({ trackingUrl: response.data.tracking_url });
+      res.json({ id: response.data.external_delivery_id });
     })
     .catch((err: any) => {
       // handle error

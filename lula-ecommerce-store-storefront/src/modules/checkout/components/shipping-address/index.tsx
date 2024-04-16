@@ -25,6 +25,7 @@ const ShippingAddress = ({
   countryCode: string
   checkoutOption: string
 }) => {
+  const [viewBilling, setViewBilling] = useState(false)
   const [formData, setFormData] = useState({
     "shipping_address.first_name": cart?.shipping_address?.first_name || "",
     "shipping_address.last_name": cart?.shipping_address?.last_name || "",
@@ -104,9 +105,6 @@ const ShippingAddress = ({
     return true // Always return true for the "company" key
   })
 
-
-  const [viewBilling, setViewBilling] = useState(false)
-  const [deliveryQuote, setDeliveryQuote] = useState(0)
   const handleSubmit = () => {
     console.log("submitting for quote")
     getDeliveryQuote()
@@ -121,7 +119,7 @@ const ShippingAddress = ({
     deliveryQuoteId: string,
     dspOption: string
   ) => {
-    await fetch("http://localhost:9000/doordash/deliveryQuoteId", {
+    await fetch("http://localhost:9000/delivery/deliveryQuoteId", {
       method: "POST",
       body: JSON.stringify({
         quoteId: deliveryQuoteId,
@@ -132,7 +130,7 @@ const ShippingAddress = ({
   }
 
   const clearDeliveryQuoteId = async (deliveryQuoteId: string, dspOption: string) => {
-    await fetch("http://localhost:9000/doordash/deliveryQuoteId", {
+    await fetch("http://localhost:9000/delivery/deliveryQuoteId", {
       method: "DELETE",
     })
     .then((response) => {
@@ -147,6 +145,7 @@ const ShippingAddress = ({
   // Needs better error checking and code cleanUp
   const getDeliveryQuote = async () => {
     try {
+      console.log(formData["shipping_address.address_1"])
       const doordashQuote = await fetch(
         "http://localhost:9000/doordash/deliveryQuote",
         {
@@ -154,9 +153,9 @@ const ShippingAddress = ({
           body: JSON.stringify({
             external_delivery_id: uuidv4(),
             // Get store info from admin?
-            pickup_address: "3400 Chestnut street, Philadelphia, PA, 19104",
+            pickup_address: "3400 Chestnut Street, Philadelphia, PA, 19104",
             pickup_phone_number: "+12156886986",
-            dropoff_address: formData["shipping_address.address_1"],
+            dropoff_address: `${formData["shipping_address.address_1"]}, ${formData["shipping_address.city"]}, ${formData["shipping_address.province"]}, ${formData["shipping_address.postal_code"]}`,
             dropoff_phone_number: "+1" + formData["shipping_address.phone"],
           }),
         }
@@ -169,7 +168,7 @@ const ShippingAddress = ({
       const UberQuote = await fetch("http://localhost:9000/uber/quote", {
         method: "POST",
         body: JSON.stringify({
-          pickup_address: "3400 Chestnut street, Philadelphia, PA 19104",
+          pickup_address: "3400 Chestnut Street, Philadelphia, PA 19104",
           dropoff_address: `{"street_address":["${formData["shipping_address.address_1"]}"],"city":"${formData["shipping_address.city"]}","state":"${formData["shipping_address.province"]}","zip_code":"${formData["shipping_address.postal_code"]}","country":"US"}`,
         }),
       })
@@ -212,7 +211,7 @@ const ShippingAddress = ({
         deliveryQuoteId
       )
 
-      return deliveryQuote
+      return deliveryQuoteId
     } catch (error) {
       console.error(error)
     }

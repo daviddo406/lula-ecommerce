@@ -7,7 +7,7 @@ import OrderDetails from "@modules/order/components/order-details"
 import ShippingDetails from "@modules/order/components/shipping-details"
 import { retrieveOrder } from "@lib/data"
 import { notFound } from "next/navigation"
-import DSPDeliveryDetails from "../components/dsp-delivery-details"
+import DSPDeliveryDetails from "../components/DSP-delivery-details"
 import PaymentDetails from "../components/payment-details"
 import Divider from "@modules/common/components/divider"
 

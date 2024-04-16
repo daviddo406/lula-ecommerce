@@ -46,6 +46,7 @@ const createDoordashDelivery = async (
   cart: Omit<Cart, "refundable_amount" | "refunded_total">
 ) => {
   console.log("MAKING Doordash CALL")
+  // Accepting the delivery quote not working creating a new delivery instead
   // const acceptDordashQuote = await fetch(
   //   "http://localhost:9000/doordash/acceptQuote/",
   //   {
@@ -60,26 +61,45 @@ const createDoordashDelivery = async (
   //   }
   // })
   const external_delivery_id = uuidv4()
-  const createDordashDelivery = await fetch(
+  const doorDashDelivery = await fetch(
     "http://localhost:9000/doordash/createDelivery/",
     {
       method: "POST",
       body: JSON.stringify({
         external_delivery_id: external_delivery_id,
-        tip: tip,
         order_fulfillment_method: "standard",
-        pickup_address: "3400 Chestnut street, Philadelphia, PA, 19104",
-        pickup_business_name: "TEST MEDUSA STORE",
+        pickup_address: "3400 Chestnut Street, Philadelphia, PA, 19104",
+        pickup_business_name: "My Store",
         dropoff_address: `${cart.shipping_address?.address_1}, ${cart.shipping_address?.city}, ${cart.shipping_address?.province}, ${cart.shipping_address?.postal_code}`,
         dropoff_phone_number: "+1" + cart.shipping_address?.phone,
         dropoff_contact_given_name: cart.customer.first_name,
         dropoff_contact_family_name: cart.customer.last_name,
+        order_value: cart.subtotal,
+        items: cart.items.filter(item => item.title !== "Tip").map((item) => {
+          return {
+            name: item.title,
+            quantity: item.quantity,
+            price: item.unit_price,
+          }
+        }),
+        tip: tip,
       }),
     }
   ).then((res) => {
     if (!res.ok) {
-      throw new Error("Could not get delivery quote ID")
+      throw new Error("Could not get delivery ID")
     }
+    return res.json()
+  })
+  .then((data) => {
+    console.log("Doordash DATA - ", data)
+    return data
+  })
+  await fetch("http://localhost:9000/delivery/updateDeliveryRecord", {
+    method: "POST",
+    body: JSON.stringify({
+      deliveryId: doorDashDelivery.id,
+    }),
   })
 }
 
@@ -105,6 +125,7 @@ const createUberDelivery = async (
           return {
             name: item.title,
             quantity: item.quantity,
+            price: item.unit_price,
           }
         }),
         quote_id: quoteID,
@@ -127,7 +148,7 @@ const createUberDelivery = async (
       console.log("UBER DATA - ", data)
       return data
     })
-  await fetch("http://localhost:9000/doordash/updateDeliveryRecord", {
+  await fetch("http://localhost:9000/delivery/updateDeliveryRecord", {
     method: "POST",
     body: JSON.stringify({
       deliveryId: uberDelivery.id,
@@ -141,7 +162,7 @@ const completeDelivery = async (
   const tipAmount = cart.items.find((item) => item.title === "Tip")?.unit_price
   const tip = tipAmount !== undefined ? tipAmount : 0
   const createDelivery = await fetch(
-    "http://localhost:9000/doordash/deliveryQuoteId",
+    "http://localhost:9000/delivery/deliveryQuoteId",
     {
       method: "GET",
     }

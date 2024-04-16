@@ -12,12 +12,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     signing_secret: String(process.env.SIGNING_SECRET),
   });
 
-  console.log(req.body, typeof req.body);
-
   client
-    .deliveryQuoteAccept(req.body)
+    .deliveryQuoteAccept(req.body.external_delivery_id)
     .then((response: DoorDashResponse<DeliveryResponse>) => {
       // do something
+      console.log(response.data);
       console.log("Accept Doordash Quote");
     })
     .catch((err: any) => {

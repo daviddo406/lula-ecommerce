@@ -34,7 +34,7 @@ export default function DSPDeliveryDetails() {
   const interval = useRef<NodeJS.Timeout | null>(null);
 
   const getDeliveryID = async () => {
-    const deliveryIdEndpoint: string = "http://localhost:9000/doordash/deliveryQuoteId";
+    const deliveryIdEndpoint: string = "http://localhost:9000/delivery/deliveryQuoteId";
     try {
       let response = await fetch(deliveryIdEndpoint, {
         method: 'GET',
@@ -45,20 +45,23 @@ export default function DSPDeliveryDetails() {
 
       let data = await response.json()
       let dspDetailsEndpoint: string;
+      let dsp: string;
 
       if (data.result[0].dspOption === "uber"){
         dspDetailsEndpoint = "/uber/delivery"
+        dsp = "uber"
       } else {
         dspDetailsEndpoint = "/doordash/getDelivery"
+        dsp = "doordash"
       }
 
-      handleGetData(`http://localhost:9000${dspDetailsEndpoint}`, data.result[0].deliveryId)
+      handleGetData(`http://localhost:9000${dspDetailsEndpoint}`, data.result[0].deliveryId, dsp)
     } catch (error) {
       console.log(error)
     }
   }
 
-  async function handleGetData(endpoint: string, id: string){
+  async function handleGetData(endpoint: string, id: string, dsp: string){
     let requestBody = {deliveryId: id}
 
     let deliveryDetails = await fetch(endpoint,{
@@ -72,19 +75,37 @@ export default function DSPDeliveryDetails() {
         return response.json()
       }
     }).then(data => {
-      if (data.courier !== null){
-        setDriverLocation({center: {lat: data.courier.location.lat, lng: data.courier.location.lng}})
-        setDriverName(data.courier.name)
-        setDriverPhoneNumber(data.courier.phone_number)
+      if (dsp === "uber") {
+        if (data.courier !== null){
+          setDriverLocation({center: {lat: data.courier.location.lat, lng: data.courier.location.lng}})
+          setDriverName(data.courier.name)
+          setDriverPhoneNumber(data.courier.phone_number)
+        }
+        let eta = dayjs(data.dropoff_eta).format("h:mm A")
+        setDropOffTime(eta)
+        setStatus(data.status)
+        if (data.status === "delivered"){
+          clearInterval(interval.current!)
+        }
+        setTrackingUrl(data.tracking_url)
+        setShowData(true)
+      } else {
+        console.log("DOORDASH", data)
+        // Need to add doordasher details
+        // if (data.courier !== null){
+        //   setDriverLocation({center: {lat: data.courier.location.lat, lng: data.courier.location.lng}})
+        //   setDriverName(data.courier.name)
+        //   setDriverPhoneNumber(data.courier.phone_number)
+        // }
+        let eta = dayjs(data.dropoff_time_estimated).format("h:mm A")
+        setDropOffTime(eta)
+        setStatus(data.delivery_status)
+        if (data.delivery_status === "delivered"){
+          clearInterval(interval.current!)
+        }
+        setTrackingUrl(data.tracking_url)
+        setShowData(true)
       }
-      let eta = dayjs(data.dropoff_eta).format("h:mm A")
-      setDropOffTime(eta)
-      setStatus(data.status)
-      if (data.status === "delivered"){
-        clearInterval(interval.current!)
-      }
-      setTrackingUrl(data.tracking_url)
-      setShowData(true)
     }).catch(error => {
       console.log(error)
     })

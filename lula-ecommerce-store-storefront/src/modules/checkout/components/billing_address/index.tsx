@@ -112,6 +112,7 @@ const BillingAddress = ({
           autoComplete="address-level1"
           value={formData["billing_address.province"]}
           onChange={handleChange}
+          required
         />
         <Input
           label="Phone"
@@ -119,6 +120,7 @@ const BillingAddress = ({
           autoComplete="tel"
           value={formData["billing_address.phone"]}
           onChange={handleChange}
+          required
         />
       </div>
     </>
