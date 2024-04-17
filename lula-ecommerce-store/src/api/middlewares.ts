@@ -67,6 +67,15 @@ export const config: MiddlewaresConfig = {
           credentials: true,
         }),
       ],
+    },
+    {
+      matcher: "/delivery/*",
+      middlewares: [
+        cors({
+          origin: "*",
+          credentials: true,
+        }),
+      ],
     }
   ],
 };

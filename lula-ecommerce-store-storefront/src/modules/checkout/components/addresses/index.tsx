@@ -46,8 +46,19 @@ const Addresses = ({
   const [message, formAction] = useFormState(setAddresses, null)
 
   const [deliveryOption, setDeliveryOption] = useState("Delivery")
-  const handleDeliveryOptionChange = (value: string) => {
+  const handleDeliveryOptionChange = async (value: string) => {
     setDeliveryOption(value)
+    toggleSameAsBilling()
+    const shippingMethodId = await medusaClient.shippingOptions
+    .list()
+    .then(({ shipping_options }) => {
+      return shipping_options[0]["id"]
+    })
+    await setShippingMethod(
+      shippingMethodId !== undefined ? shippingMethodId : "None",
+      0,
+      value.toLowerCase()
+    )
   }
 
   const handleSubmit = async () => {
@@ -152,7 +163,15 @@ const Addresses = ({
             {cart && cart.shipping_address ? (
               <div className="flex items-start gap-x-8">
                 <div className="flex items-start gap-x-1 w-full">
-                  <div className="flex flex-col w-1/3 ">
+                  <div 
+                      className={clx(
+                        "flex flex-col",
+                        {
+                          "w-1/2": cart.shipping_methods.length > 0 && cart.shipping_methods[0].data.quoteId === "pickup",
+                          "w-1/3": cart.shipping_methods.length > 0 && cart.shipping_methods[0].data.quoteId !== "pickup
+                        }
+                      )}
+                    >
                     <Text className="txt-medium-plus text-ui-fg-base mb-1">
                       Contact
                     </Text>
@@ -167,25 +186,34 @@ const Addresses = ({
                       {cart.email}
                     </Text>
                   </div>
+                  { cart.shipping_methods.length > 0 && cart.shipping_methods[0].data.quoteId !== "pickup" && (
+                    <div className="flex flex-col w-1/3">
+                      <Text className="txt-medium-plus text-ui-fg-base mb-1">
+                        Delivery Address
+                      </Text>
+                      <Text className="txt-medium text-ui-fg-subtle">
+                        {cart.shipping_address.address_1}{" "}
+                        {cart.shipping_address.address_2}
+                      </Text>
+                      <Text className="txt-medium text-ui-fg-subtle">
+                        {cart.shipping_address.postal_code},{" "}
+                        {cart.shipping_address.city}
+                      </Text>
+                      <Text className="txt-medium text-ui-fg-subtle">
+                        {cart.shipping_address.country_code?.toUpperCase()}
+                      </Text>
+                    </div>
+                  )}
 
-                  <div className="flex flex-col w-1/3">
-                    <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                      Delivery Address
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.address_1}{" "}
-                      {cart.shipping_address.address_2}
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.postal_code},{" "}
-                      {cart.shipping_address.city}
-                    </Text>
-                    <Text className="txt-medium text-ui-fg-subtle">
-                      {cart.shipping_address.country_code?.toUpperCase()}
-                    </Text>
-                  </div>
-
-                  <div className="flex flex-col w-1/3">
+                  <div 
+                    className={clx(
+                      "flex flex-col",
+                      {
+                        "w-1/2": cart.shipping_methods.length > 0 && cart.shipping_methods[0].data.quoteId === "pickup",
+                        "w-1/3": cart.shipping_methods.length > 0 && cart.shipping_methods[0].data.quoteId !== "pickup"
+                      }
+                    )}
+                  >
                     <Text className="txt-medium-plus text-ui-fg-base mb-1">
                       Billing Address
                     </Text>
