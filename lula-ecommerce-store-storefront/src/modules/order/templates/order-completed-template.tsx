@@ -10,6 +10,8 @@ import { notFound } from "next/navigation"
 import DSPDeliveryDetails from "../components/DSP-delivery-details"
 import PaymentDetails from "../components/payment-details"
 import Divider from "@modules/common/components/divider"
+import ContactInfo from "../components/contact-info"
+import DSPPickupDetails from "../components/DSP-pickup-details"
 
 type OrderCompletedTemplateProps = {
   order: Order
@@ -37,13 +39,21 @@ export default async function OrderCompletedTemplate({
           </Heading>
           <OrderDetails order={order} />
           <Divider />
-          <DSPDeliveryDetails />
+          {order.shipping_methods[0].data.quoteId === "pickup" ? (
+            <DSPPickupDetails />
+          ) : (
+            <DSPDeliveryDetails />
+          )}
           <Heading level="h2" className="flex flex-row text-3xl-regular">
             Order Summary
           </Heading>
           <Items items={order.items} region={order.region} />
           <CartTotals data={orderWithTip} />
-          <ShippingDetails order={order} />
+          {orderWithTip.shipping_methods[0].data.quoteId === "pickup" ? (
+            <ContactInfo order={order} />
+          ) : (
+            <ShippingDetails order={order} />
+          )}
           <PaymentDetails order={order} />
         </div>
       </div>

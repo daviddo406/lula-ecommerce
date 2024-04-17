@@ -1,5 +1,4 @@
 "use client";
-import { Order } from "@medusajs/medusa"
 import { useEffect, useState, useRef } from 'react'
 import "./driverObject.css" 
 import GoogleMapReact from 'google-map-react';
@@ -7,11 +6,7 @@ import { Spinner, ArrowUpRightMini } from "@medusajs/icons"
 import { Text, Container, Label } from "@medusajs/ui"
 import dayjs from "dayjs"
 
-type OrderCompletedTemplateProps = {
-  order: Order
-}
-
-const DriverLocaton = ({ lat, lng, text }) => {
+const DriverLocation = ({ lat, lng }) => {
   return (
     <div className="car">
       <div className="car-body"></div>
@@ -22,8 +17,6 @@ const DriverLocaton = ({ lat, lng, text }) => {
 }
 
 export default function DSPDeliveryDetails() {
-  // might just end up using an object to store everything so I'm not setting a lot.
-  // const [deliverDetails, setDeliveryDetails] = useState({});
   const [showData, setShowData] = useState(false);
   const [status, setStatus] = useState("")
   const [driverLocation, setDriverLocation] = useState({center: {lat: 0, lng: 0}}) 
@@ -133,10 +126,9 @@ export default function DSPDeliveryDetails() {
           defaultZoom={20}
           options= {{zoomControl: false, fullscreenControl: false, scrollwheel: false, draggable: false}}
         >
-          <DriverLocaton
+          <DriverLocation
             lat={driverLocation.center.lat}
             lng={driverLocation.center.lng}
-            text="DRIVER LOCATION"
           />
         </GoogleMapReact>
       </div>

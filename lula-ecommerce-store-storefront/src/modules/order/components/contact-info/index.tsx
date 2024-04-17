@@ -2,43 +2,43 @@ import { Order } from "@medusajs/medusa"
 import { Heading, Text } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
 
-type ShippingDetailsProps = {
+type ContactInfoProps = {
   order: Order
 }
 
-const ShippingDetails = ({ order }: ShippingDetailsProps) => {
+const ContactInfo = ({ order }: ContactInfoProps) => {
   return (
     <div>
       <Heading level="h2" className="flex flex-row text-3xl-regular my-6">
-        Delivery Info
+        Contact Info
       </Heading>
       <div className="flex items-start gap-x-8">
-        <div className="flex flex-col w-1/2">
+        <div className="flex flex-col w-1/3">
           <Text className="txt-medium-plus text-ui-fg-base mb-1">
-            Shipping Address
+            Name
           </Text>
           <Text className="txt-medium text-ui-fg-subtle">
             {order.shipping_address.first_name}{" "}
             {order.shipping_address.last_name}
           </Text>
-          <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address.address_1}{" "}
-            {order.shipping_address.address_2}
-          </Text>
-          <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address.postal_code}, {order.shipping_address.city}
-          </Text>
-          <Text className="txt-medium text-ui-fg-subtle">
-            {order.shipping_address.country_code?.toUpperCase()}
-          </Text>
         </div>
 
-        <div className="flex flex-col w-1/2 ">
-          <Text className="txt-medium-plus text-ui-fg-base mb-1">Contact</Text>
+        <div className="flex flex-col w-1/3">
+          <Text className="txt-medium-plus text-ui-fg-base mb-1">
+            Phone Number
+          </Text>
           <Text className="txt-medium text-ui-fg-subtle">
             {order.shipping_address.phone}
           </Text>
-          <Text className="txt-medium text-ui-fg-subtle">{order.email}</Text>
+        </div>
+
+        <div className="flex flex-col w-1/3">
+          <Text className="txt-medium-plus text-ui-fg-base mb-1">
+            Email Address
+          </Text>
+          <Text className="txt-medium text-ui-fg-subtle">
+            {order.email}
+          </Text>
         </div>
       </div>
       <Divider className="mt-8" />
@@ -46,4 +46,4 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
   )
 }
 
-export default ShippingDetails
+export default ContactInfo
