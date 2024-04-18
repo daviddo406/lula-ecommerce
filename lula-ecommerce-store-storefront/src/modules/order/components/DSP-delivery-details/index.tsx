@@ -85,11 +85,11 @@ export default function DSPDeliveryDetails() {
       } else {
         console.log("DOORDASH", data)
         // Need to add doordasher details
-        // if (data.courier !== null){
-        //   setDriverLocation({center: {lat: data.courier.location.lat, lng: data.courier.location.lng}})
-        //   setDriverName(data.courier.name)
-        //   setDriverPhoneNumber(data.courier.phone_number)
-        // }
+        if ("dasher_name" in data){
+          setDriverLocation({center: {lat: data.dasher_location.lat, lng: data.dasher_location.lng}})
+          setDriverName(data.dasher_name)
+          setDriverPhoneNumber(data.dasher_dropoff_phone_number)
+        }
         let eta = dayjs(data.dropoff_time_estimated).format("h:mm A")
         setDropOffTime(eta)
         setStatus(data.delivery_status)
