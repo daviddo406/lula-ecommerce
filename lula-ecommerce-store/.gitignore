@@ -3,6 +3,7 @@
 /uploads
 /node_modules
 yarn-error.log
+/data.ms
 
 .idea
 
