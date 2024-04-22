@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 }
 
 const getCollectionsWithProducts = async () => {
-  const { collections } = await getCollectionsList(0, 3).then(
+  var { collections } = await getCollectionsList(0, 3).then(
     (collections) => collections
   )
 
@@ -20,6 +20,7 @@ const getCollectionsWithProducts = async () => {
     return null
   }
 
+  collections = collections.filter(x => x.metadata["sales-key"] == process.env.SALES_CHANNEL_POOL)
   const collectionIds = collections.map((collection) => collection.id)
 
   await Promise.all(
@@ -39,7 +40,6 @@ const getCollectionsWithProducts = async () => {
       if (!collection) {
         return
       }
-
       collection.products = (response.products as unknown as Product[]).slice(0, 5);
     })
   )
