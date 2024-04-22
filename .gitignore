@@ -4,6 +4,7 @@ lula-ecommerce-store/.env
 *.csv
 lula-ecommerce-store/.env
 lula-ecommerce-store-storefront/yarn.lock
+lula-ecommerce-store/meilisearch
 __pycache__
 .DS_Store
 data.ms
