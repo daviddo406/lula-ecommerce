@@ -17,7 +17,7 @@ const fetchCategories = async () => {
 
 export default async function Footer() {
   const productCollections = await fetchCollections().then(
-    (collections) => collections
+    (collections) => collections.filter(x => x.metadata["sales-key"] == process.env.SALES_CHANNEL_POOL)
   )
   const productCategories = await fetchCategories().then(
     (categories) => categories
