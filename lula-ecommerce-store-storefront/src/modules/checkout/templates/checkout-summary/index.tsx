@@ -1,9 +1,8 @@
 import { Heading } from "@medusajs/ui"
-
 import ItemsPreviewTemplate from "@modules/cart/templates/preview"
-import DiscountCode from "@modules/checkout/components/discount-code"
 import CartTotals from "@modules/common/components/cart-totals"
 import Divider from "@modules/common/components/divider"
+import Tip from "@modules/checkout/components/tip"
 import { retrieveCart } from "@modules/cart/actions"
 
 const CheckoutSummary = async () => {
@@ -23,12 +22,14 @@ const CheckoutSummary = async () => {
         >
           In your Cart
         </Heading>
-        <Divider className="my-6" />
+        <Divider className="mt-6" />
+        <ItemsPreviewTemplate region={cart?.region} items={cart?.items.filter((lineItem) => lineItem.title !== "Tip")} />
         <CartTotals data={cart} />
-        <ItemsPreviewTemplate region={cart?.region} items={cart?.items} />
-        <div className="my-6">
-          <DiscountCode cart={cart} />
-        </div>
+        { cart.shipping_methods.length > 0 && cart.shipping_methods[0].data.quoteId !== "pickup" && (
+          <div className="my-6">
+            <Tip cart={cart} />
+          </div>
+        )}
       </div>
     </div>
   )
