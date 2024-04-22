@@ -8,7 +8,7 @@ import Hero from "@modules/home/components/hero"
 export const metadata: Metadata = {
   title: "Lula store template",
   description:
-    "A performant frontend ecommerce starter template with Next.js 14 and Medusa.",
+    "An example test store using Medusa and Next.js to demonstrate an example storefront for Lula."
 }
 
 const getCollectionsWithProducts = async () => {
@@ -40,7 +40,7 @@ const getCollectionsWithProducts = async () => {
       if (!collection) {
         return
       }
-      collection.products = response.products as unknown as Product[]
+      collection.products = (response.products as unknown as Product[]).slice(0, 5);
     })
   )
 

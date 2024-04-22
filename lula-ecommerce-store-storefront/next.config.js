@@ -45,6 +45,14 @@ const nextConfig = withStoreConfig({
         protocol: "https",
         hostname: "lula-inventory-service-staging.s3.amazonaws.com",
       },
+      {
+        protocol: "https",
+        hostname: "images.barcodelookup.com",
+      },
+      {
+        protocol: "https",
+        hostname: "applejack.com",
+      },
     ],
   },
 })
