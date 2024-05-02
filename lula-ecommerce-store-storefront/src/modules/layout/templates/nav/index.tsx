@@ -8,6 +8,7 @@ import { listRegions } from "@lib/data"
 import CartButton from "@modules/layout/components/cart-button"
 import SideMenu from "@modules/layout/components/side-menu"
 import DeliveryToggle from "@modules/layout/components/delivery-toggle/deliveryToggle.client"
+import PopupWithAddressForm from '@modules/layout/components/delivery-address-input/popup_with_address_form';
 
 export default async function Nav() {
   const regions = await listRegions().then((regions) => regions)
@@ -24,8 +25,10 @@ export default async function Nav() {
               <SideMenu regions={regions} currentRegion={currentRegion} />
             </div>
             <DeliveryToggle />
+            <PopupWithAddressForm />
           </div>
-
+          
+          
 
           <div className="flex items-center h-full">
             <Link
@@ -36,11 +39,36 @@ export default async function Nav() {
             </Link>
           </div>
 
+          
+
           <div className="flex items-center gap-x-6 h-full flex-1 basis-0 justify-end">
             <div className="hidden small:flex items-center gap-x-6 h-full">
               {process.env.FEATURE_SEARCH_ENABLED && (
                 // Update the form to use a direct submission approach
-                <form action="/search" method="get" className="flex items-center">
+                <Link
+                  className="hover:text-ui-fg-base"
+                  href="/search"
+                  scroll={false}
+                >
+                  
+                  <button 
+                  type="submit" 
+                  style={{
+                    backgroundImage: `url('/search.png')`, // Make sure the path is correct
+                    backgroundSize: 'cover', // This ensures that your image covers the button area
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center',
+                    width: '25px', // Specify the width of your button
+                    height: '25px', // Specify the height of your button
+                    border: 'none', // Remove default button border
+                    cursor: 'pointer', // Change cursor to pointer on hover
+                  }}
+                  aria-label="Search" // Accessibility for screen readers
+                  >
+</button>
+                </Link>
+                
+                /*<form action="/search" method="get" className="flex items-center">
                   <input
                     type="text"
                     name="q" // The query parameter name expected by your search page
@@ -70,7 +98,7 @@ export default async function Nav() {
                   aria-label="Search" // Accessibility for screen readers
                   >
 </button>
-                </form>
+                </form>*/
               )}
               <Link className="hover:text-ui-fg-base" href="/account">
                 Account

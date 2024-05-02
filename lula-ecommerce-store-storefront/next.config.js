@@ -53,6 +53,14 @@ const nextConfig = withStoreConfig({
         protocol: "https",
         hostname: "applejack.com",
       },
+      {
+        protocol: "https",
+        hostname: "lula-store-platform.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.freshop.com",
+      },
     ],
   },
 })
