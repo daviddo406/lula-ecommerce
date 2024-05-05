@@ -65,40 +65,10 @@ export default async function Nav() {
                   }}
                   aria-label="Search" // Accessibility for screen readers
                   >
-</button>
+                  </button>
                 </Link>
                 
-                /*<form action="/search" method="get" className="flex items-center">
-                  <input
-                    type="text"
-                    name="q" // The query parameter name expected by your search page
-                    placeholder="Search... for your favorite snacks"
-                    style={{
-                      width: '300px', // Increase width as per your design requirements
-                      height: '40px', // Increase height to make the bar taller
-                      padding: '10px', // Add padding inside the search bar
-                      fontSize: '16px', // Increase font size if necessary
-                      borderRadius: '4px', // Add rounded corners to the search bar
-                      border: '1px solid #e5e5e5', // Add a border to the search bar
-                    }}
-                    className="input-class"
-                  />
-                  <button 
-                  type="submit" 
-                  style={{
-                    backgroundImage: `url('/search.png')`, // Make sure the path is correct
-                    backgroundSize: 'cover', // This ensures that your image covers the button area
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'center',
-                    width: '25px', // Specify the width of your button
-                    height: '25px', // Specify the height of your button
-                    border: 'none', // Remove default button border
-                    cursor: 'pointer', // Change cursor to pointer on hover
-                  }}
-                  aria-label="Search" // Accessibility for screen readers
-                  >
-</button>
-                </form>*/
+                
               )}
               <Link className="hover:text-ui-fg-base" href="/account">
                 Account

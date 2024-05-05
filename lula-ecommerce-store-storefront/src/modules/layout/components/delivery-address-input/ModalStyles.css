@@ -23,3 +23,10 @@
     flex-direction: column;
     gap: 10px; /* Adjust the gap between fields as needed */
   }
+
+  .address-display {
+    padding: 10px;
+    margin-top: 10px;
+    background: #f0f0f0;
+    border-radius: 5px;
+  }

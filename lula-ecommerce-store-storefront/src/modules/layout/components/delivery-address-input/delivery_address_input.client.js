@@ -1,13 +1,20 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const AddressForm = ({ onSave }) => {
+const AddressForm = ({ onSave, initialAddress }) => {
   const [address, setAddress] = useState({
     street: '',
     city: '',
     state: '',
     zip: ''
   });
+
+  // Populate form fields when initialAddress changes
+  useEffect(() => {
+    if (initialAddress) {
+      setAddress(initialAddress);
+    }
+  }, [initialAddress]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
