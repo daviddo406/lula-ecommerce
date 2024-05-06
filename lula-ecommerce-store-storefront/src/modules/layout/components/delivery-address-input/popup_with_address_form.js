@@ -10,7 +10,8 @@ const PopupWithAddressForm = () => {
   const handleSave = (newAddress) => {
     setAddress(newAddress);
     setShowForm(false);
-    // Further processing like saving to global state or local storage
+    // Save the address to local storage
+    localStorage.setItem('savedAddress', JSON.stringify(newAddress));
     // For checking against the available store location addresses (delivery radius), and alcohol delivery city/county restrictions
   };
 

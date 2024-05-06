@@ -1,9 +1,26 @@
 "use client"
+import React, { useEffect, useState } from 'react';
 
-import { useState } from 'react';
 
 export default function DeliveryToggle() {
   const [deliveryOption, setDeliveryOption] = useState('Pick Up');
+  
+
+  
+
+    useEffect(() => {
+        // Only interact with localStorage when component is mounted, i.e., on the client side
+        const storedDeliveryOption = localStorage.getItem('deliveryOption');
+        if (storedDeliveryOption) {
+            setDeliveryOption(storedDeliveryOption);
+        }
+    }, []);
+
+    useEffect(() => {
+        // Update local storage when deliveryOption changes
+        localStorage.setItem('deliveryOption', deliveryOption);
+    }, [deliveryOption]);
+
 
   return (
     <div className="delivery-toggle-container" style={{ display: 'inline-block', border: '1px solid #ccc', borderRadius: '20px', overflow: 'hidden' }}>
