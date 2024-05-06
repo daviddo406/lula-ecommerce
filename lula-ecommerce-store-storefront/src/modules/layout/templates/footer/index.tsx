@@ -101,7 +101,7 @@ export default async function Footer() {
                     }
                   )}
                 >
-                  {productCollections?.slice(0, 6).map((c) => (
+                  {productCollections?.slice(0, 10).map((c) => (
                     <li key={c.id}>
                       <Link
                         className="hover:text-ui-fg-base"

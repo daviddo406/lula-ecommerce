@@ -26,12 +26,62 @@ export type PriceType = {
   percentage_diff?: string
 }
 
+
+
 export default function ProductActionsInner({
   product,
   region,
 }: ProductActionsProps): JSX.Element {
   const [options, setOptions] = useState<Record<string, string>>({})
   const [isAdding, setIsAdding] = useState(false)
+  const [isDisabled, setIsDisabled] = useState(false);
+  const [savedAddress, setSavedAddress] = useState({ city: '', state: '' });
+  //const [deliveryMode, setDeliveryMode] = useState('Pick Up');
+
+  
+
+  
+  // Evaluate if the product should be disabled based on restrictions and saved address
+  useEffect(() => {
+    // Ensure this code runs only on the client side
+    if (typeof window !== 'undefined') {
+      const savedAddressJSON = localStorage.getItem('savedAddress');
+      //console.log(savedAddressJSON);
+      if (savedAddressJSON) {
+        setSavedAddress(JSON.parse(savedAddressJSON));
+      }
+      const deliveryMode = localStorage.getItem('deliveryOption');
+     
+      console.log(deliveryMode);
+      if (deliveryMode === 'Delivery') {
+        setIsDisabled(product.variants.some(variant => {
+          const restrictState = variant.metadata?.restrict_state as string;
+          const restrictCities = variant.metadata?.restrict_city as string;
+          //const cityArray = restrictCities?.split(', ').map((city: string) => city.toUpperCase());
+
+          const statesArray = restrictState ? restrictState.split(',').map(state => state.trim().toUpperCase()) : [];
+          const citiesArray = restrictCities ? restrictCities.split(',').map(city => city.trim().toUpperCase()) : [];
+
+          const stateMatches = statesArray.length > 0 && statesArray.includes(savedAddress.state.toUpperCase());
+          const cityMatches = citiesArray.length > 0 && citiesArray.includes(savedAddress.city.toUpperCase());
+
+          //console.log(restrictCities);
+          //console.log(restrictState);
+          //console.log(citiesArray);
+          //console.log(statesArray);
+
+          //console.log(savedAddress.state);
+          //console.log(savedAddress.city.toUpperCase);
+
+          //console.log(stateMatches+ " < If state matches");
+          //console.log(cityMatches + " < If city matches");         
+
+          return stateMatches || cityMatches;
+        }));
+      }
+    }
+  }, [product]);
+
 
   const variants = product.variants
 
@@ -107,11 +157,23 @@ export default function ProductActionsInner({
 
   // add the selected variant to the cart
   const handleAddToCart = async () => {
-    if (!variant?.id) return
-    setIsAdding(true)
-    await addToCart({ variantId: variant.id, quantity: 1 })
-    setIsAdding(false)
+    if (!variant?.id || isDisabled) {
+      alert("This product cannot be added to the cart due to restrictions.");
+      return;
+    }
+
+    setIsAdding(true);
+    try {
+      await addToCart({ variantId: variant.id, quantity: 1 });
+    } catch (error) {
+      console.error("Failed to add to cart:", error);
+    } finally {
+      setIsAdding(false);
+    }
   }
+
+ 
+  //console.log(isDisabled + "< Is it Disabled?");
 
   return (
     <>
@@ -137,10 +199,10 @@ export default function ProductActionsInner({
         </div>
 
         <ProductPrice product={product} variant={variant} region={region} />
-
+        
         <Button
           onClick={handleAddToCart}
-          disabled={!inStock || !variant}
+          disabled={!inStock || !variant || isDisabled}
           variant="primary"
           className="w-full h-10"
           isLoading={isAdding}

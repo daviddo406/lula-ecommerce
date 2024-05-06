@@ -55,7 +55,11 @@ const nextConfig = withStoreConfig({
       },
       {
         protocol: "https",
-        hostname: "lula-store-platform.s3.amazonaws.com"
+        hostname: "lula-store-platform.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.freshop.com",
       },
     ],
   },

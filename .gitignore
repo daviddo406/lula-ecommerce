@@ -7,3 +7,5 @@ lula-ecommerce-store-storefront/yarn.lock
 lula-ecommerce-store/meilisearch
 __pycache__
 .DS_Store
+data.ms
+meilisearch
