@@ -263,3 +263,14 @@ images: {
       },
 ```
 
+
+### You may need to install react-select package if you receive any errors regarding react-select package missing
+
+Just ctrl+c the frontend and run:
+
+```
+cd lula-ecommerce-store-storefront
+npm install react-select
+npm run dev
+```
+

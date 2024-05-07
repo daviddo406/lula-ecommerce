@@ -8,6 +8,7 @@ import { listRegions } from "@lib/data"
 import CartButton from "@modules/layout/components/cart-button"
 import SideMenu from "@modules/layout/components/side-menu"
 import DeliveryToggle from "@modules/layout/components/delivery-toggle/deliveryToggle.client"
+import PopupWithAddressForm from '@modules/layout/components/delivery-address-input/popup_with_address_form';
 
 export default async function Nav() {
   const regions = await listRegions().then((regions) => regions)
@@ -24,8 +25,10 @@ export default async function Nav() {
               <SideMenu regions={regions} currentRegion={currentRegion} />
             </div>
             <DeliveryToggle />
+            <PopupWithAddressForm />
           </div>
-
+          
+          
 
           <div className="flex items-center h-full">
             <Link
@@ -36,25 +39,18 @@ export default async function Nav() {
             </Link>
           </div>
 
+          
+
           <div className="flex items-center gap-x-6 h-full flex-1 basis-0 justify-end">
             <div className="hidden small:flex items-center gap-x-6 h-full">
               {process.env.FEATURE_SEARCH_ENABLED && (
                 // Update the form to use a direct submission approach
-                <form action="/search" method="get" className="flex items-center">
-                  <input
-                    type="text"
-                    name="q" // The query parameter name expected by your search page
-                    placeholder="Search... for your favorite snacks"
-                    style={{
-                      width: '300px', // Increase width as per your design requirements
-                      height: '40px', // Increase height to make the bar taller
-                      padding: '10px', // Add padding inside the search bar
-                      fontSize: '16px', // Increase font size if necessary
-                      borderRadius: '4px', // Add rounded corners to the search bar
-                      border: '1px solid #e5e5e5', // Add a border to the search bar
-                    }}
-                    className="input-class"
-                  />
+                <Link
+                  className="hover:text-ui-fg-base"
+                  href="/search"
+                  scroll={false}
+                >
+                  
                   <button 
                   type="submit" 
                   style={{
@@ -69,8 +65,10 @@ export default async function Nav() {
                   }}
                   aria-label="Search" // Accessibility for screen readers
                   >
-</button>
-                </form>
+                  </button>
+                </Link>
+                
+                
               )}
               <Link className="hover:text-ui-fg-base" href="/account">
                 Account

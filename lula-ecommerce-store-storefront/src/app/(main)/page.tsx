@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 }
 
 const getCollectionsWithProducts = async () => {
-  var { collections } = await getCollectionsList(0, 3).then(
+  var { collections } = await getCollectionsList(0, 8).then(
     (collections) => collections
   )
 
