@@ -20,7 +20,7 @@ const getCollectionsWithProducts = async () => {
     return null
   }
 
-  collections = collections.filter(x => x.metadata["sales-key"] == process.env.SALES_CHANNEL_POOL)
+  collections = collections.filter(x => x.metadata["sales-key"] == process.env.NEXT_PUBLIC_SALES_CHANNEL_POOL)
   const collectionIds = collections.map((collection) => collection.id)
 
   await Promise.all(

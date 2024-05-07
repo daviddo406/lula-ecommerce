@@ -1,19 +1,29 @@
-
 import { cookies } from "next/headers"
 import Link from "next/link"
 import { Suspense } from "react";
-
+import dynamic from 'next/dynamic';
 
 import { listRegions } from "@lib/data"
 import CartButton from "@modules/layout/components/cart-button"
 import SideMenu from "@modules/layout/components/side-menu"
 import DeliveryToggle from "@modules/layout/components/delivery-toggle/deliveryToggle.client"
 import PopupWithAddressForm from '@modules/layout/components/delivery-address-input/popup_with_address_form';
+//import SalesChannelSwitcher from '@modules/layout/components/store-location-switch/sales_channel_switch';
+const SalesChannelSwitcher = dynamic(
+  () => import('@modules/layout/components/store-location-switch/sales_channel_switch'),
+  { 
+    ssr: false,
+    // Add a loading component or function here if needed for better UX
+    loading: () => <p>Loading...</p>
+  }
+);
 
 export default async function Nav() {
   const regions = await listRegions().then((regions) => regions)
   const regionCookie = cookies().get("_medusa_region")?.value
   const currentRegion = regionCookie && JSON.parse(regionCookie)
+
+  
 
 
   return (
@@ -40,8 +50,13 @@ export default async function Nav() {
           </div>
 
           
+          
+        
+
+          
 
           <div className="flex items-center gap-x-6 h-full flex-1 basis-0 justify-end">
+            <SalesChannelSwitcher />
             <div className="hidden small:flex items-center gap-x-6 h-full">
               {process.env.FEATURE_SEARCH_ENABLED && (
                 // Update the form to use a direct submission approach
