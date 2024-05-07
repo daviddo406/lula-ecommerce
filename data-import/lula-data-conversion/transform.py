@@ -1,5 +1,6 @@
 import csv
 import re
+import requests
 
 from models.MedusaProduct import MedusaProduct 
 
@@ -71,6 +72,8 @@ def write_template_header(writer):
         "Image 2 Url"
     ])
 
+# categories = {}
+category_names = set()
 skipped_count = 0
 with open('./data-import/lula-data-conversion/LULA_TO_MEDUSA_IMPORT.csv', 'w', newline='') as csvfile:
     spamwriter = csv.writer(csvfile, delimiter=';',
@@ -139,14 +142,13 @@ with open('./data-import/lula-data-conversion/LULA_TO_MEDUSA_IMPORT.csv', 'w', n
             ##TODO
             ##load all data in, while creating proper parent items so that we can link variants.
 
-            # if handle in found:
-            #     found[handle] += 1
-            # else:
-            #     found[handle] = 0
-
-            # handle = handle + "-" + str(found[handle])
             #endregion
             
+            if category not in category_names:
+                category_names.add(category)
+
+            # if handle not in categories:
+            #     categories[handle] = category
 
             product = MedusaProduct(
                 a_product_id="",
@@ -164,8 +166,8 @@ with open('./data-import/lula-data-conversion/LULA_TO_MEDUSA_IMPORT.csv', 'w', n
                 a_product_origin_country="",
                 a_product_mid_code="",
                 a_product_material="",
-                a_product_collection_title=category,
-                a_product_collection_handle=category.lower(),
+                a_product_collection_title=category.replace(" ", "-"),
+                a_product_collection_handle=category.lower().replace(" ", "-"),
                 a_product_type="",         # Moving 'category' from here to product_collection_title
                 a_product_tags=tags,
                 a_product_discountable="true",
@@ -199,3 +201,35 @@ with open('./data-import/lula-data-conversion/LULA_TO_MEDUSA_IMPORT.csv', 'w', n
 
 
 print("SKIPPED ENTRIES: " + str(skipped_count))
+
+## Creates a json file with array of {handle: category} objects
+# with open('./data-import/lula-data-conversion/CATEGORIES.json', 'w', newline='') as f:
+#     f.write("{\"relations\": {\n")
+#     for i, c in enumerate(categories.items()):
+#         f.write(f"  \"{c[0]}\":\"{c[1]}\"")
+#         if i + 1!= len(categories.items()):
+#             f.write(",\n")
+#         else:
+#             f.write("\n")
+#     f.write("}}")
+
+## CURL REQUESTS
+BACKEND_URL = "http://localhost:9000"
+EMAIL = "drexel-sd-shopping@gmail.com"
+PASSWORD = "SeniorDesign#1234"
+
+s = requests.Session();
+
+headers = {'Content-Type': 'application/json'}
+
+## Authorize session
+url = f"{BACKEND_URL}/admin/auth"
+payload = {"email": EMAIL, "password": PASSWORD}
+res = s.post(url, headers=headers, json=payload)
+
+## Create collections
+for collection in category_names:
+    url = f"{BACKEND_URL}/admin/collections"
+    payload = {"title": collection}
+    res = s.post(url, headers=headers, json=payload)
+    print(res.json())
