@@ -1,12 +1,10 @@
 "use client"
 import React, { useEffect, useState } from 'react';
+import { emitter } from '../../../../utils/emitter'
 
 
 export default function DeliveryToggle() {
   const [deliveryOption, setDeliveryOption] = useState('Pick Up');
-  
-
-  
 
     useEffect(() => {
         // Only interact with localStorage when component is mounted, i.e., on the client side
@@ -19,6 +17,7 @@ export default function DeliveryToggle() {
     useEffect(() => {
         // Update local storage when deliveryOption changes
         localStorage.setItem('deliveryOption', deliveryOption);
+        emitter.emit('deliveryOptionChange', deliveryOption);
     }, [deliveryOption]);
 
 
