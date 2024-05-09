@@ -244,6 +244,27 @@ Note: Currently, it is recommended to only bind one sales channel per api key at
 
 
 
+
+### You will need to install tiny-emitter package in order for Legal Restrictions to work properly
+
+Just ctrl+c the frontend and run:
+
+```
+cd lula-ecommerce-store-storefront
+npm install tiny-emitter
+```
+
+
+### You may need to install react-select package if you receive any errors regarding react-select package missing
+
+Just ctrl+c the frontend and run:
+
+```
+cd lula-ecommerce-store-storefront
+npm install react-select
+```
+
+
 ### Starting Next.js Storefront
 ```
 cd lula-ecommerce-store-storefront
@@ -295,14 +316,4 @@ images: {
       },
 ```
 
-
-### You may need to install react-select package if you receive any errors regarding react-select package missing
-
-Just ctrl+c the frontend and run:
-
-```
-cd lula-ecommerce-store-storefront
-npm install react-select
-npm run dev
-```
 
