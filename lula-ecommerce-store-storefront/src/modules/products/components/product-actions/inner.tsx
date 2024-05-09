@@ -4,7 +4,8 @@ import { Region } from "@medusajs/medusa"
 import { PricedProduct } from "@medusajs/medusa/dist/types/pricing"
 import { Button } from "@medusajs/ui"
 import { isEqual } from "lodash"
-import React, { useEffect, useMemo, useRef, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { emitter } from "../../../../utils/emitter"
 
 import { useIntersection } from "@lib/hooks/use-in-view"
 import Divider from "@modules/common/components/divider"
@@ -26,7 +27,12 @@ export type PriceType = {
   percentage_diff?: string
 }
 
+type DeliveryOption = 'Pick Up' | 'Delivery';
 
+interface Address {
+  city: string;
+  state: string;
+}
 
 export default function ProductActionsInner({
   product,
@@ -35,52 +41,63 @@ export default function ProductActionsInner({
   const [options, setOptions] = useState<Record<string, string>>({})
   const [isAdding, setIsAdding] = useState(false)
   const [isDisabled, setIsDisabled] = useState(false);
-  const [savedAddress, setSavedAddress] = useState({ city: '', state: '' });
-  //const [deliveryMode, setDeliveryMode] = useState('Pick Up');
+  const [savedAddress, setSavedAddress] = useState<Address>({ city: '', state: '' });
+  const [deliveryOption, setDeliveryOption] = useState<DeliveryOption>('Pick Up');
 
-  
 
-  
-  // Evaluate if the product should be disabled based on restrictions and saved address
-  useEffect(() => {
-    // Ensure this code runs only on the client side
-    if (typeof window !== 'undefined') {
-      const savedAddressJSON = localStorage.getItem('savedAddress');
-      //console.log(savedAddressJSON);
-      if (savedAddressJSON) {
-        setSavedAddress(JSON.parse(savedAddressJSON));
-      }
-      const deliveryMode = localStorage.getItem('deliveryOption');
-     
-      console.log(deliveryMode);
-      if (deliveryMode === 'Delivery') {
-        setIsDisabled(product.variants.some(variant => {
-          const restrictState = variant.metadata?.restrict_state as string;
-          const restrictCities = variant.metadata?.restrict_city as string;
-          //const cityArray = restrictCities?.split(', ').map((city: string) => city.toUpperCase());
+  // Function to check if the product should be disabled for legal restriction
+  const checkRestrictions = useCallback((option: DeliveryOption, address: Address) => {
+    if (option === 'Delivery') {
+      const disabled = product.variants.some(variant => {
+        const restrictState = variant.metadata?.restrict_state as string;
+        const restrictCities = variant.metadata?.restrict_city as string;
 
-          const statesArray = restrictState ? restrictState.split(',').map(state => state.trim().toUpperCase()) : [];
-          const citiesArray = restrictCities ? restrictCities.split(',').map(city => city.trim().toUpperCase()) : [];
+        const statesArray = restrictState ? restrictState.split(',').map(state => state.trim().toUpperCase()) : [];
+        const citiesArray = restrictCities ? restrictCities.split(',').map(city => city.trim().toUpperCase()) : [];
 
-          const stateMatches = statesArray.length > 0 && statesArray.includes(savedAddress.state.toUpperCase());
-          const cityMatches = citiesArray.length > 0 && citiesArray.includes(savedAddress.city.toUpperCase());
+        const stateMatches = statesArray.includes(address.state.toUpperCase());
+        const cityMatches = citiesArray.includes(address.city.toUpperCase());
 
-          //console.log(restrictCities);
-          //console.log(restrictState);
-          //console.log(citiesArray);
-          //console.log(statesArray);
-
-          //console.log(savedAddress.state);
-          //console.log(savedAddress.city.toUpperCase);
-
-          //console.log(stateMatches+ " < If state matches");
-          //console.log(cityMatches + " < If city matches");         
-
-          return stateMatches || cityMatches;
-        }));
-      }
+        return stateMatches || cityMatches;
+      });
+      setIsDisabled(disabled);
+    } else {
+      setIsDisabled(false);
     }
-  }, [product]);
+  }, [product.variants]);
+
+
+
+  // Listen to delivery option changes
+  useEffect(() => {
+    const handleDeliveryChange = (option: DeliveryOption) => {
+      setDeliveryOption(option);
+      checkRestrictions(option, savedAddress);
+    };
+
+    emitter.on('deliveryOptionChange', handleDeliveryChange);
+    return () => {
+      emitter.off('deliveryOptionChange', handleDeliveryChange);
+    };
+  }, [checkRestrictions, savedAddress]);
+
+
+
+  // Listen to address changes
+  useEffect(() => {
+    const handleAddressChange = (address: Address) => {
+      setSavedAddress(address);
+      checkRestrictions(deliveryOption, address);
+    };
+
+    emitter.on('savedAddressChange', handleAddressChange);
+    return () => {
+      emitter.off('savedAddressChange', handleAddressChange);
+    };
+  }, [checkRestrictions, deliveryOption]);
+
+
+
 
 
   const variants = product.variants
@@ -157,7 +174,7 @@ export default function ProductActionsInner({
 
   // add the selected variant to the cart
   const handleAddToCart = async () => {
-    if (!variant?.id || isDisabled) {
+    if (!variant?.id) {
       alert("This product cannot be added to the cart due to restrictions.");
       return;
     }
@@ -211,6 +228,8 @@ export default function ProductActionsInner({
             ? "Select variant"
             : !inStock
             ? "Out of stock"
+            : isDisabled
+            ? "Legal Restriction"
             : "Add to cart"}
         </Button>
         <MobileActions
