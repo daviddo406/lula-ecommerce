@@ -1,6 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import medusaClient from '../../../../utils/medusaClient'
+import { updateCartSalesChannel, createOrUpdateCart } from '../../../../utils/cartManager';
 
 
 
@@ -10,6 +11,8 @@ const SalesChannelSwitcher = () => {
     const [currentSalesChannelId, setCurrentSalesChannelId] = useState("");
     const [loading, setLoading] = useState(false);
     const publishableApiKeyId = process.env.NEXT_PUBLIC_SALES_CHANNEL_POOL;
+
+
   
     useEffect(() => {
         setLoading(true);
@@ -37,30 +40,40 @@ const SalesChannelSwitcher = () => {
   
       fetchSalesChannels();
     }, [publishableApiKeyId]);
+
+
+
   
+
     
     
     const handleSwitchSalesChannel = async (salesChannelId) => {
         setLoading(true);
         try {
-          // First delete the current sales channel association if it exists
-          if (currentSalesChannelId) {
-            await medusaClient.admin.publishableApiKeys.deleteSalesChannelsBatch(publishableApiKeyId, { sales_channel_ids: [{ id: currentSalesChannelId }] });
-          }
-          // Add the new sales channel association
-          if (publishableApiKeyId) {
-            await medusaClient.admin.publishableApiKeys.addSalesChannelsBatch(publishableApiKeyId, { sales_channel_ids: [{ id: salesChannelId }] });
-            setCurrentSalesChannelId(salesChannelId);
-            location.reload(); // refresh the page
-            console.log('Switched sales channel successfully');
-          }else{
-            console.error("Publishable API Key ID is undefined.");
-          }
-        } catch (error) {
-            console.error('Failed to switch sales channels:', error);
-        } finally {
-            setLoading(false);
-        }
+            
+            // First delete the current sales channel association if it exists
+            if (currentSalesChannelId) {
+                await medusaClient.admin.publishableApiKeys.deleteSalesChannelsBatch(publishableApiKeyId, { sales_channel_ids: [{ id: currentSalesChannelId }] });
+            }
+            // Add the new sales channel association
+            if (publishableApiKeyId) {
+                await medusaClient.admin.publishableApiKeys.addSalesChannelsBatch(publishableApiKeyId, { sales_channel_ids: [{ id: salesChannelId }] });
+                
+                // Update the sales channel & create/retrieve cart
+                const cart = await createOrUpdateCart(salesChannelId);
+                
+                setCurrentSalesChannelId(salesChannelId); // Bind new selected sales channel to publishable api key
+                
+                location.reload(); // refresh the page
+                console.log('Switched sales channel successfully');
+            }else{
+                console.error("Publishable API Key ID is undefined.");
+            }
+            } catch (error) {
+                console.error('Failed to switch sales channels:', error);
+            } finally {
+                setLoading(false);
+            }
     };
   
     if (loading) return <div>Loading...</div>;
