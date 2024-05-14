@@ -2,13 +2,14 @@ import { cookies } from "next/headers"
 import Link from "next/link"
 import { Suspense } from "react";
 import dynamic from 'next/dynamic';
+import { emitter } from "../../../../utils/emitter"
 
 import { listRegions } from "@lib/data"
 import CartButton from "@modules/layout/components/cart-button"
 import SideMenu from "@modules/layout/components/side-menu"
 import DeliveryToggle from "@modules/layout/components/delivery-toggle/deliveryToggle.client"
 import PopupWithAddressForm from '@modules/layout/components/delivery-address-input/popup_with_address_form';
-//import SalesChannelSwitcher from '@modules/layout/components/store-location-switch/sales_channel_switch';
+
 const SalesChannelSwitcher = dynamic(
   () => import('@modules/layout/components/store-location-switch/sales_channel_switch'),
   { 
@@ -18,12 +19,22 @@ const SalesChannelSwitcher = dynamic(
   }
 );
 
+const ClientAddressDisplay = dynamic(() => import('../../components/delivery-address-input/ClientAddressDisplay'), { ssr: false });
+
+
+interface Address {
+  street?: string;
+  city: string;
+  state: string;
+  zip?: string;
+}
+
 export default async function Nav() {
   const regions = await listRegions().then((regions) => regions)
   const regionCookie = cookies().get("_medusa_region")?.value
   const currentRegion = regionCookie && JSON.parse(regionCookie)
 
-  
+
 
 
   return (
@@ -36,6 +47,7 @@ export default async function Nav() {
             </div>
             <DeliveryToggle />
             <PopupWithAddressForm />
+            <ClientAddressDisplay />
           </div>
           
           
