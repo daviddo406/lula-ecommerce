@@ -57,7 +57,8 @@ export default async function Nav() {
               href="/"
               className="txt-compact-xlarge-plus hover:text-ui-fg-base uppercase"
             >
-              Test Store
+              <img src="/WawaEmblem.png" alt="Store Logo" style={{ maxWidth: '120px' }} />
+              
             </Link>
           </div>
 
