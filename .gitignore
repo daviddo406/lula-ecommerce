@@ -1,5 +1,7 @@
 .vscode
 lula-ecommerce-store-storefront/yarn.lock
 lula-ecommerce-store/.env
-
-/node_modules
+*.csv
+lula-ecommerce-store/.env
+lula-ecommerce-store-storefront/yarn.lock
+lula-ecommerce-store/meilisearch
