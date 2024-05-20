@@ -14,8 +14,22 @@ type SortProductsProps = {
 
 const hardcodedCollections = [
   { label: "All Products", url: "http://localhost:8000/store"},
-  { label: "Featured Products", url: "http://localhost:8000/collections/featured" },
-  { label: "Snacks", url: "http://localhost:8000/collections/snack" },
+  { label: "Beverages", url: "http://localhost:8000/collections/beverages" },
+  { label: "Snacks", url: "http://localhost:8000/collections/snacks" },
+  { label: "Quick Meals", url: "http://localhost:8000/collections/quickmeals" },
+  { label: "Grocery", url: "http://localhost:8000/collections/grocery" },
+  { label: "Milk", url: "http://localhost:8000/collections/milk" },
+  { label: "Bakery", url: "http://localhost:8000/collections/bakery" },
+  { label: "Candy", url: "http://localhost:8000/collections/candy" },
+  { label: "Seltzer", url: "http://localhost:8000/collections/seltzer" },
+  { label: "Water", url: "http://localhost:8000/collections/water" },
+  { label: "Alcohol", url: "http://localhost:8000/collections/alcohol" },
+  { label: "Wine", url: "http://localhost:8000/collections/wine" },
+  { label: "Beer", url: "http://localhost:8000/collections/beer" },
+  { label: "Personal Care", url: "http://localhost:8000/collections/personalcare" },
+  { label: "Automotive", url: "http://localhost:8000/collections/automotive" },
+  { label: "Others", url: "http://localhost:8000/collections/others" },
+
 ];
 
 const sortOptions = [
@@ -53,7 +67,7 @@ const SortProducts = ({ sortBy, setQueryParams }: SortProductsProps) => {
         </select>
       </div>
       <div className="mt-4">
-        <span>Collections:</span>
+        <span style={{fontWeight: "bold"}}>Collections</span>
         <ul>
           {hardcodedCollections.map((collection) => (
             <li key={collection.label}>

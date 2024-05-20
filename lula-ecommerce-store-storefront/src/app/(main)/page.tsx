@@ -81,9 +81,9 @@ export default async function Home() {
     <>
       {/* Reduce padding here if needed */}
       <div className="py-6 flex flex-col items-center bg-gray-100"><StoreInfoDisplay /></div>
-      <div className="py-2 flex flex-col items-center"> {/* Adjusted padding */}
+      <div className="py-0 flex flex-col items-center"> {/* Adjusted padding */}
         
-        <ul className="flex flex-col gap-x-6 mt-4">
+        <ul className="flex flex-col gap-x-6 mt-0">
           <FeaturedProducts collections={collections} />
         </ul>
       </div>
