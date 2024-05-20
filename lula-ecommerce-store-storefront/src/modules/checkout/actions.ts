@@ -151,7 +151,11 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
   } catch (error: any) {
     return error.toString()
   }
-  
+
+  // redirect("/checkout?step=payment")
+}
+
+export async function proceedToPayment() {
   redirect("/checkout?step=payment")
 }
 

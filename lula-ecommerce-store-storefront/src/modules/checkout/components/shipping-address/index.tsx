@@ -4,11 +4,13 @@ import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
 import AddressSelect from "../address-select"
 import CountrySelect from "../country-select"
-import { Button, Container, Heading } from "@medusajs/ui"
+import { Badge, Button, Container, Heading, Tooltip } from "@medusajs/ui"
 import { v4 as uuidv4 } from "uuid"
-import { setShippingMethod } from "@modules/checkout/actions"
+import { proceedToPayment, setShippingMethod } from "@modules/checkout/actions"
 import { medusaClient } from "@lib/config"
 import BillingAddress from "../billing_address"
+import { XMark, InformationCircleSolid } from "@medusajs/icons"
+// import { Toaster, toast } from "@medusajs/ui"
 
 const ShippingAddress = ({
   customer,
@@ -97,14 +99,6 @@ const ShippingAddress = ({
     return true
   }
 
-  const isValid = Object.entries(formData).every(([key, value]) => {
-    // Check if the key is not "company" and if the value is not an empty string
-    if (key !== "company") {
-      return value !== ""
-    }
-    return true // Always return true for the "company" key
-  })
-
   const handleSubmit = () => {
     console.log("submitting for quote")
     getDeliveryQuote()
@@ -114,6 +108,8 @@ const ShippingAddress = ({
     setViewBilling(!viewBilling)
     onChange()
   }
+
+  const [invalidAdress, setInvalidAddress] = useState(false)
 
   const saveDeliveryQuoteId = async (
     deliveryQuoteId: string,
@@ -129,16 +125,99 @@ const ShippingAddress = ({
     console.log("INSERTED delivery quote id ")
   }
 
-  const clearDeliveryQuoteId = async (deliveryQuoteId: string, dspOption: string) => {
+  const clearDeliveryQuoteId = async (
+    deliveryQuoteId: string,
+    dspOption: string
+  ) => {
     await fetch("http://localhost:9000/delivery/deliveryQuoteId", {
       method: "DELETE",
-    })
-    .then((response) => {
+    }).then((response) => {
       if (response.ok) {
         saveDeliveryQuoteId(deliveryQuoteId, dspOption)
       }
     })
     console.log("DELETED previous quote Id's")
+  }
+
+  const handleShippingMethod = async (
+    deliveryFee: number,
+    deliveryQuoteId: string
+  ) => {
+    const shippingMethodId = await medusaClient.shippingOptions
+      .list()
+      .then(({ shipping_options }) => {
+        return shipping_options[0]["id"]
+      })
+    // Need to send back quoteID also
+    console.log("SHIPPING METHOD ID - ", shippingMethodId)
+    await setShippingMethod(
+      shippingMethodId !== undefined ? shippingMethodId : "None",
+      deliveryFee,
+      deliveryQuoteId
+    )
+
+    // redirect("/checkout?step=payment")
+    proceedToPayment()
+  }
+  // const [errorMessage, setErrorMessage] = useState("")
+  const handleDeliveryQuoteResponse = async (
+    doordashResponse: any,
+    uberResponse: any
+  ) => {
+    console.log("HANDLING REQUEST")
+    if (doordashResponse.status !== 200 && uberResponse.status !== 200) {
+      setInvalidAddress(true)
+      return false
+    } else if (doordashResponse.status === 200 && uberResponse.status !== 200) {
+      setInvalidAddress(false)
+      var deliveryQuoteId = doordashResponse.quoteId
+      var deliveryFee = doordashResponse.fee
+      var dspOption = "doordash"
+      saveDeliveryQuoteId(deliveryQuoteId, dspOption)
+      handleShippingMethod(deliveryFee, deliveryQuoteId)
+    } else if (doordashResponse.status !== 200 && uberResponse.status === 200) {
+      setInvalidAddress(false)
+      var deliveryQuoteId = uberResponse.quoteId
+      var deliveryFee = uberResponse.fee
+      var dspOption = "uber"
+      saveDeliveryQuoteId(deliveryQuoteId, dspOption)
+      handleShippingMethod(deliveryFee, deliveryQuoteId)
+    } else {
+      setInvalidAddress(false)
+      var doordash = {
+        deliveryFee: doordashResponse.fee,
+        external_delivery_id: doordashResponse.quoteId,
+      }
+
+      // MAKE RIGHT
+      var uber = {
+        deliveryFee: uberResponse.fee,
+        external_delivery_id: uberResponse.quoteId,
+      }
+
+      const deliveryFee: number = Math.max(
+        doordash.deliveryFee,
+        uber.deliveryFee
+      )
+      console.log("SETTING - ", deliveryFee)
+
+      // You'll be able to access the delivery quote id using this -> cart?.shipping_methods[0].data.quoteId
+      let deliveryQuoteId: string = ""
+      let dspOption: string = ""
+      if (deliveryFee === doordash.deliveryFee) {
+        deliveryQuoteId = doordash.external_delivery_id
+        dspOption = "doordash"
+      } else {
+        deliveryQuoteId = uber.external_delivery_id
+        dspOption = "uber"
+      }
+      //save delivery id in db by making fetch call with body as id
+      console.log("QUOTE ID - ", deliveryQuoteId)
+      console.log("dspOption - ", dspOption)
+      saveDeliveryQuoteId(deliveryQuoteId, dspOption)
+      // clearDeliveryQuoteId(deliveryQuoteId, dspOption)
+      handleShippingMethod(deliveryFee, deliveryQuoteId)
+    }
   }
 
   // ----------- Layo Edits ---------------
@@ -160,11 +239,7 @@ const ShippingAddress = ({
           }),
         }
       )
-      console.log("Doordash done")
-      const doordashResponse = await doordashQuote.json()
-      console.log("doordash - ", doordashResponse, doordashResponse.deliveryFee)
 
-      // Layo - need to send actual delivery paramets to Uber request
       const UberQuote = await fetch("http://localhost:9000/uber/quote", {
         method: "POST",
         body: JSON.stringify({
@@ -173,59 +248,41 @@ const ShippingAddress = ({
         }),
       })
 
+      console.log("Doordash done")
+      const doordashResponse = await doordashQuote.json()
+      // console.log("doordash - ", doordashResponse, doordashResponse.data.fee)
+
+      // Layo - need to send actual delivery paramets to Uber request
+
       console.log("Uber done")
       const uberResponse = await UberQuote.json()
-      console.log("uber - ", uberResponse, uberResponse.fee)
+      // console.log("uber - ", uberResponse, uberResponse.data.fee)
 
-      const deliveryFee: number = Math.min(
-        doordashResponse.deliveryFee,
-        uberResponse.fee
-      )
-      console.log("SETTING - ", deliveryFee)
-
-      // You'll be able to access the delivery quote id using this -> cart?.shipping_methods[0].data.quoteId
-      let deliveryQuoteId: string = ""
-      let dspOption: string = ""
-      if (deliveryFee === doordashResponse.deliveryFee) {
-        deliveryQuoteId = doordashResponse.external_delivery_id
-        dspOption = "doordash"
-      } else {
-        deliveryQuoteId = uberResponse.id
-        dspOption = "uber"
-      }
-      //save delivery id in db by making fetch call with body as id
-      console.log("QUOTE ID - ", deliveryQuoteId)
-      console.log("dspOption - ", dspOption)
-      clearDeliveryQuoteId(deliveryQuoteId, dspOption)
-
-      const shippingMethodId = await medusaClient.shippingOptions
-        .list()
-        .then(({ shipping_options }) => {
-          return shipping_options[0]["id"]
-        })
-      // Need to send back quoteID also
-      console.log("SHIPPING METHOD ID - ", shippingMethodId)
-      await setShippingMethod(
-        shippingMethodId !== undefined ? shippingMethodId : "None",
-        deliveryFee,
-        deliveryQuoteId
-      )
-
-      return deliveryQuoteId
+      handleDeliveryQuoteResponse(doordashResponse, uberResponse)
     } catch (error) {
-      console.error(error)
+      console.log(error)
     }
   }
 
   return (
     <>
-      {customer && (checkoutOption === "Delivery") && (addressesInRegion?.length || 0) > 0 && (
-        <Container className="mb-6 flex flex-col gap-y-4 p-5">
-          <p className="text-small-regular">
-            {`Hi ${customer.first_name}, do you want to use one of your saved addresses?`}
-          </p>
-          <AddressSelect addresses={customer.shipping_addresses} cart={cart} />
-        </Container>
+      {customer &&
+        checkoutOption === "Delivery" &&
+        (addressesInRegion?.length || 0) > 0 && (
+          <Container className="mb-6 flex flex-col gap-y-4 p-5">
+            <p className="text-small-regular">
+              {`Hi ${customer.first_name}, do you want to use one of your saved addresses?`}
+            </p>
+            <AddressSelect
+              addresses={customer.shipping_addresses}
+              cart={cart}
+            />
+          </Container>
+        )}
+      {!isFormDataValid(formData) && (
+        <Tooltip content="All required fields must be filled to proceed">
+          <InformationCircleSolid color="orange" />
+        </Tooltip>
       )}
       <div className="grid grid-cols-2 gap-4">
         <Input
@@ -313,6 +370,20 @@ const ShippingAddress = ({
             />
           </>
         )}
+      </div>
+      <div>
+        {isFormDataValid(formData) &&
+          checkoutOption === "Delivery" &&
+          invalidAdress && (
+            <>
+              <Badge color="red">
+                {" "}
+                <XMark color="red" />
+                Unable to deliver to this address: Address might be invalid, or
+                out of range (over 15 miles away)
+              </Badge>
+            </>
+          )}
       </div>
       {checkoutOption === "Delivery" && (
         <div className="my-8">

@@ -30,15 +30,18 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
 
 export const DELETE = async (req: MedusaRequest, res: MedusaResponse) => {
   //   const dspRepository: typeof DspDelivery = req.scope.resolve("dspDelivery");
+  console.log("\n\n DELETING");
   const manager: EntityManager = req.scope.resolve("manager");
   const dspRepo = manager.getRepository(dspDelivery);
 
   //   //   add try catch for error handling
 
-  const post = await dspRepo.findBy({
-    created_at: Raw((alias) => `${alias} < NOW()`),
-  });
+  // const post = await dspRepo.findBy({
+  //   created_at: Raw((alias) => `${alias} < NOW()`),
+  // });
+  const post = await dspRepo.find();
+  console.log(post);
   console.log("DELETE - ", post);
   const result = await dspRepo.remove(post);
-  return res.json()
+  return res.json();
 };

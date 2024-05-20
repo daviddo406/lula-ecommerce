@@ -76,6 +76,15 @@ export const config: MiddlewaresConfig = {
           credentials: true,
         }),
       ],
-    }
+    },
+    {
+      matcher: "/twilio/*",
+      middlewares: [
+        cors({
+          origin: "*",
+          credentials: true,
+        }),
+      ],
+    },
   ],
 };

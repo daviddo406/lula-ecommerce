@@ -1,7 +1,7 @@
 "use client"
 
 import { Cart, PaymentSession } from "@medusajs/medusa"
-import { Button } from "@medusajs/ui"
+import { Badge, Button } from "@medusajs/ui"
 import { OnApproveActions, OnApproveData } from "@paypal/paypal-js"
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js"
 import { useElements, useStripe } from "@stripe/react-stripe-js"
@@ -11,6 +11,7 @@ import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
 import { v4 as uuidv4 } from "uuid"
 import { stringify } from "querystring"
+import { XMark } from "@medusajs/icons"
 
 type PaymentButtonProps = {
   cart: Omit<Cart, "refundable_amount" | "refunded_total">
@@ -40,26 +41,18 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({ cart }) => {
   }
 }
 
+// const [DspErrorMessage, setDspErrorMessage] = useState<string | null>(null)
+
+// DELETE BY CART ID, SO DOESNT CLEAR ALL ORDERS
+//  WHAT HAPPENS IF CART IS IGNORED - NEVER CHECKED OUT
+// CANNOT TRACK ORDER THAT DOES NOT EXIST, IF ERROR STOP INTERVAL AND DISPLAY MESSAGE
+
 const createDoordashDelivery = async (
   quoteID: string,
   tip: number,
   cart: Omit<Cart, "refundable_amount" | "refunded_total">
 ) => {
   console.log("MAKING Doordash CALL")
-  // Accepting the delivery quote not working creating a new delivery instead
-  // const acceptDordashQuote = await fetch(
-  //   "http://localhost:9000/doordash/acceptQuote/",
-  //   {
-  //     method: "POST",
-  //     body: JSON.stringify({
-  //       external_delivery_id: quoteID,
-  //     }),
-  //   }
-  // ).then((res) => {
-  //   if (!res.ok) {
-  //     throw new Error("Could not get delivery quote ID")
-  //   }
-  // })
   const external_delivery_id = uuidv4()
   const doorDashDelivery = await fetch(
     "http://localhost:9000/doordash/createDelivery/",
@@ -75,26 +68,29 @@ const createDoordashDelivery = async (
         dropoff_contact_given_name: cart.customer.first_name,
         dropoff_contact_family_name: cart.customer.last_name,
         order_value: cart.subtotal,
-        items: cart.items.filter(item => item.title !== "Tip").map((item) => {
-          return {
-            name: item.title,
-            quantity: item.quantity,
-            price: item.unit_price,
-          }
-        }),
+        items: cart.items
+          .filter((item) => item.title !== "Tip")
+          .map((item) => {
+            return {
+              name: item.title,
+              quantity: item.quantity,
+              price: item.unit_price,
+            }
+          }),
         tip: tip,
       }),
     }
-  ).then((res) => {
-    if (!res.ok) {
-      throw new Error("Could not get delivery ID")
-    }
-    return res.json()
-  })
-  .then((data) => {
-    console.log("Doordash DATA - ", data)
-    return data
-  })
+  )
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error("Could not get delivery ID")
+      }
+      return res.json()
+    })
+    .then((data) => {
+      console.log("Doordash DATA - ", data)
+      return data
+    })
   await fetch("http://localhost:9000/delivery/updateDeliveryRecord", {
     method: "POST",
     body: JSON.stringify({
@@ -121,20 +117,22 @@ const createUberDelivery = async (
         dropoff_name: `${cart.customer.first_name} ${cart.customer.last_name}`,
         dropoff_address: `{"street_address":["${cart.shipping_address?.address_1}"],"city":"${cart.shipping_address?.city}","state":"${cart.shipping_address?.province}","zip_code":"${cart.shipping_address?.postal_code}","country":"US"}`,
         dropoff_phone_number: cart.shipping_address?.phone,
-        manifest_items: cart.items.filter(item => item.title !== "Tip").map((item) => {
-          return {
-            name: item.title,
-            quantity: item.quantity,
-            price: item.unit_price,
-          }
-        }),
+        manifest_items: cart.items
+          .filter((item) => item.title !== "Tip")
+          .map((item) => {
+            return {
+              name: item.title,
+              quantity: item.quantity,
+              price: item.unit_price,
+            }
+          }),
         quote_id: quoteID,
         tip: tip,
         test_specifications: {
           robo_courier_specification: {
             mode: "auto",
           },
-        }
+        },
       }),
     }
   )
@@ -169,24 +167,53 @@ const completeDelivery = async (
   )
     .then((res) => {
       if (!res.ok) {
-        throw new Error("Could not get delivery quote ID")
+        throw new Error("An error occured, please try again or contact support")
       }
       return res.json()
     })
     .then((data) => {
-      console.log(
-        "TESTTT - ",
-        data.result[0].dspOption,
-        data.result[0].deliveryQuoteId
-      )
-      // if doordash
-      if (data.result[0].dspOption == "doordash") {
-        createDoordashDelivery(data.result[0].deliveryQuoteId, tip, cart)
+      // throw new Error("Doordash not working")
+      if (data.result.length > 0) {
+        console.log(
+          "TESTTT - ",
+          data.result[0].dspOption,
+          data.result[0].deliveryQuoteId
+        )
+        // if doordash
+        if (data.result[0].dspOption == "doordash") {
+          createDoordashDelivery(
+            data.result[0].deliveryQuoteId,
+            tip,
+            cart
+          ).catch(() => {
+            throw new Error(
+              `Unable to confirm delivery with Doordash. Please return to cart and start checkout process again`
+            )
+          })
+        }
+        // if uber
+        if (data.result[0].dspOption === "uber") {
+          console.log("UBER")
+          createUberDelivery(data.result[0].deliveryQuoteId, tip, cart).catch(
+            () => {
+              throw new Error(
+                `Unable to confirm delivery with Uber. Please return to cart and start checkout process again`
+              )
+            }
+          )
+        }
       }
-      // if uber
-      if (data.result[0].dspOption === "uber") {
-        console.log("UBER")
-        createUberDelivery(data.result[0].deliveryQuoteId, tip, cart)
+    })
+    .catch((error: Error) => {
+      if (
+        error.message.includes("Doordash") ||
+        error.message.includes("Uber")
+      ) {
+        throw error
+      } else {
+        throw new Error(
+          "Unable to place order. Please try again or contact support"
+        )
       }
     })
 }
@@ -202,12 +229,12 @@ const StripePaymentButton = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const onPaymentCompleted = async () => {
-    await placeOrder()
+    completeDelivery(cart)
       .then(async () => {
-        completeDelivery(cart)
+        await placeOrder()
       })
-      .catch(() => {
-        setErrorMessage("An error occurred, please try again.")
+      .catch((err: Error) => {
+        setErrorMessage(err.message)
         setSubmitting(false)
       })
   }
@@ -286,7 +313,18 @@ const StripePaymentButton = ({
       >
         Place order
       </Button>
-      <ErrorMessage error={errorMessage} />
+      {/* <ErrorMessage error={errorMessage} /> */}
+      <div>
+        {errorMessage && (
+          <>
+            <Badge color="red">
+              {" "}
+              <XMark color="red" />
+              {errorMessage}
+            </Badge>
+          </>
+        )}
+      </div>
     </>
   )
 }
@@ -302,12 +340,12 @@ const PayPalPaymentButton = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const onPaymentCompleted = async () => {
-    await placeOrder()
+    completeDelivery(cart)
       .then(async () => {
-        completeDelivery(cart)
+        await placeOrder()
       })
-      .catch(() => {
-        setErrorMessage("An error occurred, please try again.")
+      .catch((err: Error) => {
+        setErrorMessage(err.message)
         setSubmitting(false)
       })
   }
@@ -348,7 +386,18 @@ const PayPalPaymentButton = ({
           onApprove={handlePayment}
           disabled={notReady || submitting || isPending}
         />
-        <ErrorMessage error={errorMessage} />
+        {/* <ErrorMessage error={errorMessage} /> */}
+        <div>
+          {errorMessage && (
+            <>
+              <Badge color="red">
+                {" "}
+                <XMark color="red" />
+                {errorMessage}
+              </Badge>
+            </>
+          )}
+        </div>
       </>
     )
   }
@@ -365,12 +414,12 @@ const ManualTestPaymentButton = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const onPaymentCompleted = async () => {
-    await placeOrder()
+    completeDelivery(cart)
       .then(async () => {
-        completeDelivery(cart)
+        await placeOrder()
       })
-      .catch((err) => {
-        setErrorMessage(err.toString())
+      .catch((err: Error) => {
+        setErrorMessage(err.message)
         setSubmitting(false)
       })
   }
@@ -391,7 +440,18 @@ const ManualTestPaymentButton = ({
       >
         Place order
       </Button>
-      <ErrorMessage error={errorMessage} />
+      {/* <ErrorMessage error={errorMessage} /> */}
+      <div>
+        {errorMessage && (
+          <>
+            <Badge color="red">
+              {" "}
+              <XMark color="red" />
+              {errorMessage}
+            </Badge>
+          </>
+        )}
+      </div>
     </>
   )
 }

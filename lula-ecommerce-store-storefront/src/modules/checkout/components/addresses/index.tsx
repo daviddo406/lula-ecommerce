@@ -10,7 +10,11 @@ import Spinner from "@modules/common/icons/spinner"
 
 import BillingAddress from "../billing_address"
 import ShippingAddress from "../shipping-address"
-import { setAddresses, setShippingMethod } from "../../actions"
+import {
+  proceedToPayment,
+  setAddresses,
+  setShippingMethod,
+} from "../../actions"
 import { useFormState } from "react-dom"
 import ErrorMessage from "../error-message"
 import compareAddresses from "@lib/util/compare-addresses"
@@ -50,10 +54,10 @@ const Addresses = ({
     setDeliveryOption(value)
     toggleSameAsBilling()
     const shippingMethodId = await medusaClient.shippingOptions
-    .list()
-    .then(({ shipping_options }) => {
-      return shipping_options[0]["id"]
-    })
+      .list()
+      .then(({ shipping_options }) => {
+        return shipping_options[0]["id"]
+      })
     await setShippingMethod(
       shippingMethodId !== undefined ? shippingMethodId : "None",
       0,
@@ -72,6 +76,7 @@ const Addresses = ({
       0,
       "pickup"
     )
+    proceedToPayment()
   }
 
   return (
@@ -98,29 +103,36 @@ const Addresses = ({
       {isOpen ? (
         <form action={formAction}>
           <div className="flex content-center justify-center mb-3">
-            <Tabs onValueChange={handleDeliveryOptionChange} defaultValue={deliveryOption}>
+            <Tabs
+              onValueChange={handleDeliveryOptionChange}
+              defaultValue={deliveryOption}
+            >
               <Tabs.List>
-              <Tabs.Trigger 
+                <Tabs.Trigger
                   className={clx(
                     "border-ui-border-base bg-ui-bg-subtle border px-5",
                     {
-                      "border-ui-border-interactive": deliveryOption === "Delivery",
+                      "border-ui-border-interactive":
+                        deliveryOption === "Delivery",
                       "hover:shadow-elevation-card-rest transition-shadow ease-in-out duration-150":
                         deliveryOption !== "Delivery",
-                    })}
-                    value="Delivery"
+                    }
+                  )}
+                  value="Delivery"
                 >
                   Delivery
                 </Tabs.Trigger>
-                <Tabs.Trigger 
+                <Tabs.Trigger
                   className={clx(
                     "border-ui-border-base bg-ui-bg-subtle border px-5",
                     {
-                      "border-ui-border-interactive": deliveryOption === "Pickup",
+                      "border-ui-border-interactive":
+                        deliveryOption === "Pickup",
                       "hover:shadow-elevation-card-rest transition-shadow ease-in-out duration-150":
                         deliveryOption !== "Pickup",
-                    })}
-                    value="Pickup"
+                    }
+                  )}
+                  value="Pickup"
                 >
                   Pick Up
                 </Tabs.Trigger>
@@ -163,15 +175,16 @@ const Addresses = ({
             {cart && cart.shipping_address ? (
               <div className="flex items-start gap-x-8">
                 <div className="flex items-start gap-x-1 w-full">
-                  <div 
-                      className={clx(
-                        "flex flex-col",
-                        {
-                          "w-1/2": cart.shipping_methods.length > 0 && cart.shipping_methods[0].data.quoteId === "pickup",
-                          "w-1/3": cart.shipping_methods.length > 0 && cart.shipping_methods[0].data.quoteId !== "pickup
-                        }
-                      )}
-                    >
+                  <div
+                    className={clx("flex flex-col", {
+                      "w-1/2":
+                        cart.shipping_methods.length > 0 &&
+                        cart.shipping_methods[0].data.quoteId === "pickup",
+                      "w-1/3":
+                        cart.shipping_methods.length > 0 &&
+                        cart.shipping_methods[0].data.quoteId !== "pickup",
+                    })}
+                  >
                     <Text className="txt-medium-plus text-ui-fg-base mb-1">
                       Contact
                     </Text>
@@ -186,33 +199,35 @@ const Addresses = ({
                       {cart.email}
                     </Text>
                   </div>
-                  { cart.shipping_methods.length > 0 && cart.shipping_methods[0].data.quoteId !== "pickup" && (
-                    <div className="flex flex-col w-1/3">
-                      <Text className="txt-medium-plus text-ui-fg-base mb-1">
-                        Delivery Address
-                      </Text>
-                      <Text className="txt-medium text-ui-fg-subtle">
-                        {cart.shipping_address.address_1}{" "}
-                        {cart.shipping_address.address_2}
-                      </Text>
-                      <Text className="txt-medium text-ui-fg-subtle">
-                        {cart.shipping_address.postal_code},{" "}
-                        {cart.shipping_address.city}
-                      </Text>
-                      <Text className="txt-medium text-ui-fg-subtle">
-                        {cart.shipping_address.country_code?.toUpperCase()}
-                      </Text>
-                    </div>
-                  )}
-
-                  <div 
-                    className={clx(
-                      "flex flex-col",
-                      {
-                        "w-1/2": cart.shipping_methods.length > 0 && cart.shipping_methods[0].data.quoteId === "pickup",
-                        "w-1/3": cart.shipping_methods.length > 0 && cart.shipping_methods[0].data.quoteId !== "pickup"
-                      }
+                  {cart.shipping_methods.length > 0 &&
+                    cart.shipping_methods[0].data.quoteId !== "pickup" && (
+                      <div className="flex flex-col w-1/3">
+                        <Text className="txt-medium-plus text-ui-fg-base mb-1">
+                          Delivery Address
+                        </Text>
+                        <Text className="txt-medium text-ui-fg-subtle">
+                          {cart.shipping_address.address_1}{" "}
+                          {cart.shipping_address.address_2}
+                        </Text>
+                        <Text className="txt-medium text-ui-fg-subtle">
+                          {cart.shipping_address.postal_code},{" "}
+                          {cart.shipping_address.city}
+                        </Text>
+                        <Text className="txt-medium text-ui-fg-subtle">
+                          {cart.shipping_address.country_code?.toUpperCase()}
+                        </Text>
+                      </div>
                     )}
+
+                  <div
+                    className={clx("flex flex-col", {
+                      "w-1/2":
+                        cart.shipping_methods.length > 0 &&
+                        cart.shipping_methods[0].data.quoteId === "pickup",
+                      "w-1/3":
+                        cart.shipping_methods.length > 0 &&
+                        cart.shipping_methods[0].data.quoteId !== "pickup",
+                    })}
                   >
                     <Text className="txt-medium-plus text-ui-fg-base mb-1">
                       Billing Address

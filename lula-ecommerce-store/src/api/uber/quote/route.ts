@@ -14,9 +14,15 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     .post(url, quoteReqData, headers)
     .then((quoteResData) => {
       console.log(quoteResData.data);
-      res.json(quoteResData.data);
+      res.json({
+        status: quoteResData.status,
+        // status: 400,
+        fee: quoteResData.data.fee,
+        quoteId: quoteResData.data.id,
+      });
+      // res.json({ test: "hi" });
     })
     .catch((error) => {
-      console.log(error);
+      // console.log(error);
     });
 }
