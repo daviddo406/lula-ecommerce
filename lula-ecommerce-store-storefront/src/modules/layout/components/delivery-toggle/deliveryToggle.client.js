@@ -29,8 +29,8 @@ export default function DeliveryToggle() {
           padding: '10px 20px',
           border: 'none',
           borderRadius: '20px',
-          backgroundColor: deliveryOption === 'Pick Up' ? '#007bff' : 'transparent',
-          color: deliveryOption === 'Pick Up' ? 'white' : '#007bff',
+          backgroundColor: deliveryOption === 'Pick Up' ? '#eb04fb' : 'transparent',
+          color: deliveryOption === 'Pick Up' ? 'white' : '#eb04fb',
           cursor: 'pointer',
         }}
       >
@@ -42,8 +42,8 @@ export default function DeliveryToggle() {
           padding: '10px 20px',
           border: 'none',
           borderRadius: '20px',
-          backgroundColor: deliveryOption === 'Delivery' ? '#007bff' : 'transparent',
-          color: deliveryOption === 'Delivery' ? 'white' : '#007bff',
+          backgroundColor: deliveryOption === 'Delivery' ? '#eb04fb' : 'transparent',
+          color: deliveryOption === 'Delivery' ? 'white' : '#eb04fb',
           cursor: 'pointer',
         }}
       >
