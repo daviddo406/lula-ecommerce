@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import medusaClient from '../../../../utils/medusaClient'
-import { updateCartSalesChannel, createOrUpdateCart } from '../../../../utils/cartManager';
+import { createOrUpdateCart } from '../../../../utils/cartManager';
 import { emitter } from "../../../../utils/emitter"
 
 
@@ -69,6 +69,7 @@ const SalesChannelSwitcher = () => {
                 const selectedChannel = salesChannels.find(channel => channel.id === salesChannelId);
                 console.log(selectedChannel);
                 if (selectedChannel) {
+                    // Set the current selected sales channel in local storage for access
                     localStorage.setItem('currentSalesChannel', JSON.stringify(selectedChannel));
                 }
                 //emitter.emit('salesChannelChange', selectedChannel);  // Emit event with channel data
