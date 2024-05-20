@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import medusaClient from '../../../../utils/medusaClient'
 import { updateCartSalesChannel, createOrUpdateCart } from '../../../../utils/cartManager';
+import { emitter } from "../../../../utils/emitter"
 
 
 
@@ -26,7 +27,8 @@ const SalesChannelSwitcher = () => {
         if (publishableApiKeyId) {
             const { sales_channels: associatedChannels } = await medusaClient.admin.publishableApiKeys.listSalesChannels(publishableApiKeyId);
             if (associatedChannels.length > 0) {
-              setCurrentSalesChannelId(associatedChannels[0].id); // Assuming only one is associated at a time
+                setCurrentSalesChannelId(associatedChannels[0].id); // Assuming only one is associated at a time
+
             }
           } else {
             console.error("Publishable API Key ID is undefined.");
@@ -61,10 +63,19 @@ const SalesChannelSwitcher = () => {
                 
                 // Update the sales channel & create/retrieve cart
                 const cart = await createOrUpdateCart(salesChannelId);
-                
+
                 setCurrentSalesChannelId(salesChannelId); // Bind new selected sales channel to publishable api key
+
+                const selectedChannel = salesChannels.find(channel => channel.id === salesChannelId);
+                console.log(selectedChannel);
+                if (selectedChannel) {
+                    localStorage.setItem('currentSalesChannel', JSON.stringify(selectedChannel));
+                }
+                //emitter.emit('salesChannelChange', selectedChannel);  // Emit event with channel data
+                
                 
                 location.reload(); // refresh the page
+                
                 console.log('Switched sales channel successfully');
             }else{
                 console.error("Publishable API Key ID is undefined.");
