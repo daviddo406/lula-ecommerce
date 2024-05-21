@@ -13,6 +13,9 @@ export class dspDelivery extends BaseEntity {
   @Column({ type: "varchar" })
   deliveryId: string | null;
 
+  @Column({ type: "varchar" })
+  cartId: string | null;
+
   @BeforeInsert()
   private beforeInsert(): void {
     this.id = generateEntityId(this.id, "dspDelivery");

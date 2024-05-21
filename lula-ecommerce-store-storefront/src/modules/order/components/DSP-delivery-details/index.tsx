@@ -6,6 +6,11 @@ import { Spinner, ArrowUpRightMini } from "@medusajs/icons"
 import { Text, Container, Label, Badge } from "@medusajs/ui"
 import dayjs from "dayjs"
 import { XMark } from "@medusajs/icons"
+import { Order } from "@medusajs/medusa"
+
+type OrderCompletedTemplateProps = {
+  order: Order
+}
 
 const DriverLocation = ({ lat, lng }) => {
   return (
@@ -17,7 +22,9 @@ const DriverLocation = ({ lat, lng }) => {
   )
 }
 
-export default function DSPDeliveryDetails() {
+export default function DSPDeliveryDetails({
+  order,
+}: OrderCompletedTemplateProps) {
   const [showData, setShowData] = useState(false)
   const [status, setStatus] = useState("")
   const [driverLocation, setDriverLocation] = useState({
@@ -44,6 +51,9 @@ export default function DSPDeliveryDetails() {
   const clearDeliveryQuoteId = async () => {
     await fetch("http://localhost:9000/delivery/deliveryQuoteId", {
       method: "DELETE",
+      body: JSON.stringify({
+        cartId: order?.cart_id,
+      }),
     }).then((response) => {
       if (!response.ok) {
         // saveDeliveryQuoteId(deliveryQuoteId, dspOption)
@@ -55,8 +65,11 @@ export default function DSPDeliveryDetails() {
   const getDeliveryID = async () => {
     const deliveryIdEndpoint: string =
       "http://localhost:9000/delivery/deliveryQuoteId"
+    const params = new URLSearchParams({
+      cartId: order?.cart_id,
+    })
     try {
-      let response = await fetch(deliveryIdEndpoint, {
+      let response = await fetch(`${deliveryIdEndpoint}?${params.toString()}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
