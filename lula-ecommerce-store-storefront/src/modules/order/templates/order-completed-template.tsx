@@ -42,7 +42,7 @@ export default async function OrderCompletedTemplate({
           {order.shipping_methods[0].data.quoteId === "pickup" ? (
             <DSPPickupDetails />
           ) : (
-            <DSPDeliveryDetails />
+            <DSPDeliveryDetails order={order} />
           )}
           <Heading level="h2" className="flex flex-row text-3xl-regular">
             Order Summary

@@ -29,7 +29,8 @@ const ADMIN_CORS =
 const STORE_CORS = process.env.STORE_CORS || "http://localhost:8000";
 
 const DATABASE_URL =
-  process.env.DATABASE_URL || "postgres://postgres:${process.env.DB_PASSWORD}@localhost/medusa-starter-default";
+  process.env.DATABASE_URL ||
+  "postgres://postgres:${process.env.DB_PASSWORD}@localhost/medusa-starter-default";
 
 const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 
@@ -57,12 +58,11 @@ const plugins = [
     options: {
       api_key: process.env.SENDGRID_API_KEY,
       from: process.env.SENDGRID_FROM,
-      order_placed_template: 
-        process.env.SENDGRID_ORDER_PLACED_ID,
+      order_placed_template: process.env.SENDGRID_ORDER_PLACED_ID,
       localization: {
-        "de-DE": { // locale key
-          order_placed_template:
-            process.env.SENDGRID_ORDER_PLACED_ID_LOCALIZED,
+        "de-DE": {
+          // locale key
+          order_placed_template: process.env.SENDGRID_ORDER_PLACED_ID_LOCALIZED,
         },
       },
     },
@@ -90,6 +90,33 @@ const plugins = [
       clientId: process.env.PAYPAL_CLIENT_ID,
       clientSecret: process.env.PAYPAL_CLIENT_SECRET,
       authWebhookId: process.env.PAYPAL_AUTH_WEBHOOK_ID,
+    },
+  },
+  {
+    resolve: `medusa-plugin-meilisearch`,
+    options: {
+      // config object passed when creating an instance
+      // of the MeiliSearch client
+      config: {
+        host: process.env.MEILISEARCH_HOST,
+        apiKey: process.env.MEILISEARCH_API_KEY,
+      },
+      settings: {
+        products: {
+          indexSettings: {
+            searchableAttributes: ["title", "description", "variant_sku"],
+            displayedAttributes: [
+              "id",
+              "title",
+              "description",
+              "variant_sku",
+              "thumbnail",
+              "handle",
+            ],
+          },
+          primaryKey: "id",
+        },
+      },
     },
   },
 ];

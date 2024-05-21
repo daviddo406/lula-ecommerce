@@ -23,6 +23,9 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       // res.json({ test: "hi" });
     })
     .catch((error) => {
-      // console.log(error);
+      console.log(error);
+      res.json({
+        status: 400,
+      });
     });
 }

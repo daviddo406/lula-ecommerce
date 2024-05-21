@@ -110,6 +110,26 @@ const ShippingAddress = ({
   }
 
   const [invalidAdress, setInvalidAddress] = useState(false)
+  const [DspErrorMessage, setDspErrorMessage] = useState<string | null>(null)
+
+  const clearAndSaveQuoteId = async (deliveryQuoteId, dspOption) => {
+    clearDeliveryQuoteId().then(() => {
+      saveDeliveryQuoteId(deliveryQuoteId, dspOption)
+    })
+  }
+  const clearDeliveryQuoteId = async () => {
+    await fetch("http://localhost:9000/delivery/deliveryQuoteId", {
+      method: "DELETE",
+      body: JSON.stringify({
+        cartId: cart?.id,
+      }),
+    }).then((response) => {
+      if (!response.ok) {
+        // saveDeliveryQuoteId(deliveryQuoteId, dspOption)
+      }
+    })
+    console.log("DELETED previous quote Id's")
+  }
 
   const saveDeliveryQuoteId = async (
     deliveryQuoteId: string,
@@ -120,23 +140,10 @@ const ShippingAddress = ({
       body: JSON.stringify({
         quoteId: deliveryQuoteId,
         dspOption: dspOption,
+        cartId: cart?.id,
       }),
     })
     console.log("INSERTED delivery quote id ")
-  }
-
-  const clearDeliveryQuoteId = async (
-    deliveryQuoteId: string,
-    dspOption: string
-  ) => {
-    await fetch("http://localhost:9000/delivery/deliveryQuoteId", {
-      method: "DELETE",
-    }).then((response) => {
-      if (response.ok) {
-        saveDeliveryQuoteId(deliveryQuoteId, dspOption)
-      }
-    })
-    console.log("DELETED previous quote Id's")
   }
 
   const handleShippingMethod = async (
@@ -166,6 +173,7 @@ const ShippingAddress = ({
   ) => {
     console.log("HANDLING REQUEST")
     if (doordashResponse.status !== 200 && uberResponse.status !== 200) {
+      setDspErrorMessage(doordashResponse.errorMessage)
       setInvalidAddress(true)
       return false
     } else if (doordashResponse.status === 200 && uberResponse.status !== 200) {
@@ -173,14 +181,14 @@ const ShippingAddress = ({
       var deliveryQuoteId = doordashResponse.quoteId
       var deliveryFee = doordashResponse.fee
       var dspOption = "doordash"
-      saveDeliveryQuoteId(deliveryQuoteId, dspOption)
+      await clearAndSaveQuoteId(deliveryQuoteId, dspOption)
       handleShippingMethod(deliveryFee, deliveryQuoteId)
     } else if (doordashResponse.status !== 200 && uberResponse.status === 200) {
       setInvalidAddress(false)
       var deliveryQuoteId = uberResponse.quoteId
       var deliveryFee = uberResponse.fee
       var dspOption = "uber"
-      saveDeliveryQuoteId(deliveryQuoteId, dspOption)
+      await clearAndSaveQuoteId(deliveryQuoteId, dspOption)
       handleShippingMethod(deliveryFee, deliveryQuoteId)
     } else {
       setInvalidAddress(false)
@@ -195,7 +203,7 @@ const ShippingAddress = ({
         external_delivery_id: uberResponse.quoteId,
       }
 
-      const deliveryFee: number = Math.max(
+      const deliveryFee: number = Math.min(
         doordash.deliveryFee,
         uber.deliveryFee
       )
@@ -214,8 +222,7 @@ const ShippingAddress = ({
       //save delivery id in db by making fetch call with body as id
       console.log("QUOTE ID - ", deliveryQuoteId)
       console.log("dspOption - ", dspOption)
-      saveDeliveryQuoteId(deliveryQuoteId, dspOption)
-      // clearDeliveryQuoteId(deliveryQuoteId, dspOption)
+      await clearAndSaveQuoteId(deliveryQuoteId, dspOption)
       handleShippingMethod(deliveryFee, deliveryQuoteId)
     }
   }
@@ -379,8 +386,7 @@ const ShippingAddress = ({
               <Badge color="red">
                 {" "}
                 <XMark color="red" />
-                Unable to deliver to this address: Address might be invalid, or
-                out of range (over 15 miles away)
+                {DspErrorMessage}
               </Badge>
             </>
           )}

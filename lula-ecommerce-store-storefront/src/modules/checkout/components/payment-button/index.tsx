@@ -95,6 +95,7 @@ const createDoordashDelivery = async (
     method: "POST",
     body: JSON.stringify({
       deliveryId: doorDashDelivery.id,
+      cartId: cart?.id,
     }),
   })
 }
@@ -150,6 +151,7 @@ const createUberDelivery = async (
     method: "POST",
     body: JSON.stringify({
       deliveryId: uberDelivery.id,
+      cartId: cart?.id,
     }),
   })
 }
@@ -159,8 +161,14 @@ const completeDelivery = async (
 ) => {
   const tipAmount = cart.items.find((item) => item.title === "Tip")?.unit_price
   const tip = tipAmount !== undefined ? tipAmount : 0
+  console.log("GETTING QUOTE ID")
+  const deliveryIdEndpoint: string =
+    "http://localhost:9000/delivery/deliveryQuoteId"
+  const params = new URLSearchParams({
+    cartId: cart?.id,
+  })
   const createDelivery = await fetch(
-    "http://localhost:9000/delivery/deliveryQuoteId",
+    `${deliveryIdEndpoint}?${params.toString()}`,
     {
       method: "GET",
     }
@@ -211,6 +219,7 @@ const completeDelivery = async (
       ) {
         throw error
       } else {
+        console.log(error.message)
         throw new Error(
           "Unable to place order. Please try again or contact support"
         )
