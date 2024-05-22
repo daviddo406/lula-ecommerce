@@ -27,7 +27,7 @@ export type PriceType = {
   percentage_diff?: string
 }
 
-type DeliveryOption = 'Pick Up' | 'Delivery';
+//type DeliveryOption = 'Pick Up' | 'Delivery';
 
 interface Address {
   city: string;
@@ -42,11 +42,29 @@ export default function ProductActionsInner({
   const [isAdding, setIsAdding] = useState(false)
   const [isDisabled, setIsDisabled] = useState(false);
   const [savedAddress, setSavedAddress] = useState<Address>({ city: '', state: '' });
-  const [deliveryOption, setDeliveryOption] = useState<DeliveryOption>('Pick Up');
+  const [deliveryOption, setDeliveryOption] = useState('Pick Up');
+
+
+  // This useEffect hook is used to initialize the component state from localStorage
+  // when the component mounts. This is crucial for keeping state in sync across pages.
+  useEffect(() => {
+    const savedAddress = localStorage.getItem('savedAddress');
+    const deliveryOption = localStorage.getItem('deliveryOption');
+    // If there is a saved address in localStorage, parse it, set it to state,
+    // and check restrictions based on this address and the current delivery option.
+    if (savedAddress) {
+        setSavedAddress(JSON.parse(savedAddress));
+        checkRestrictions(deliveryOption, JSON.parse(savedAddress));
+    }
+    // If there is a saved delivery option, set it to state.
+    if (deliveryOption) {
+        setDeliveryOption(deliveryOption);
+    }
+}, []); // Empty dependency array ensures this runs only once when the component mounts.
 
 
   // Function to check if the product should be disabled for legal restriction
-  const checkRestrictions = useCallback((option: DeliveryOption, address: Address) => {
+  const checkRestrictions = useCallback((option : string | null, address: Address) => {
     if (option === 'Delivery') {
       const disabled = product.variants.some(variant => {
         const restrictState = variant.metadata?.restrict_state as string;
@@ -70,7 +88,7 @@ export default function ProductActionsInner({
 
   // Listen to delivery option changes
   useEffect(() => {
-    const handleDeliveryChange = (option: DeliveryOption) => {
+    const handleDeliveryChange = (option: string) => {
       setDeliveryOption(option);
       checkRestrictions(option, savedAddress);
     };
