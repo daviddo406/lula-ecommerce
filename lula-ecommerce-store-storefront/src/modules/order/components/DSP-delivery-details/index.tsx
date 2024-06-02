@@ -44,6 +44,7 @@ export default function DSPDeliveryDetails({
       method: "POST",
       body: JSON.stringify({
         cancellationMessage: cancellationMessage,
+        userPhoneNumber: "+1" + order?.shipping_address.phone,
       }),
     })
   }
@@ -59,7 +60,6 @@ export default function DSPDeliveryDetails({
         // saveDeliveryQuoteId(deliveryQuoteId, dspOption)
       }
     })
-    console.log("DELETED previous quote Id's")
   }
 
   const getDeliveryID = async () => {
@@ -93,9 +93,7 @@ export default function DSPDeliveryDetails({
         data.result[0].deliveryId,
         dsp
       )
-    } catch (error) {
-      console.log(error)
-    }
+    } catch (error) {}
   }
 
   async function handleGetData(endpoint: string, id: string, dsp: string) {
@@ -148,7 +146,6 @@ export default function DSPDeliveryDetails({
           setTrackingUrl(data.tracking_url)
           setShowData(true)
         } else {
-          console.log("DOORDASH", data)
           // Need to add doordasher details
           if ("dasher_name" in data) {
             try {
@@ -167,9 +164,7 @@ export default function DSPDeliveryDetails({
                   },
                 })
               }
-            } catch {
-              console.log("Change still failed")
-            }
+            } catch {}
             setDriverName(data.dasher_name)
             setDriverPhoneNumber(data.dasher_dropoff_phone_number)
           }
@@ -178,7 +173,6 @@ export default function DSPDeliveryDetails({
           setStatus(data.delivery_status)
           if (data.delivery_status === "delivered") {
             clearInterval(interval.current!)
-            console.log("DELETEING DELIVERY QUOTE ID")
             clearDeliveryQuoteId()
           }
           if (data.delivery_status === "cancelled") {
@@ -196,7 +190,6 @@ export default function DSPDeliveryDetails({
         }
       })
       .catch((error) => {
-        console.log(error)
         clearInterval(interval.current!)
       })
   }
@@ -207,7 +200,6 @@ export default function DSPDeliveryDetails({
       interval.current = setInterval(() => {
         getDeliveryID()
       }, 20000)
-      console.log(interval.current, "INTERVAL")
     }
     return () => clearInterval(interval.current!)
   }, [])

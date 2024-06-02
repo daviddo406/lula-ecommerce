@@ -72,7 +72,6 @@ export async function retrieveCart() {
     const cart = await getCart(cartId).then((cart) => cart)
     return cart
   } catch (e) {
-    console.log(e)
     return null
   }
 }
@@ -161,7 +160,9 @@ export async function enrichLineItems(
   | Omit<LineItem, "beforeInsert" | "beforeUpdate" | "afterUpdateOrLoad">[]
   | undefined
 > {
-  const lineItemsWithVariants = lineItems.filter((lineItem) => lineItem.title !== "Tip")
+  const lineItemsWithVariants = lineItems.filter(
+    (lineItem) => lineItem.title !== "Tip"
+  )
   // Prepare query parameters
   const queryParams = {
     ids: lineItemsWithVariants.map((lineItem) => lineItem.variant.product_id),

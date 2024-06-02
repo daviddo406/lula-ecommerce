@@ -100,7 +100,6 @@ const ShippingAddress = ({
   }
 
   const handleSubmit = () => {
-    console.log("submitting for quote")
     getDeliveryQuote()
   }
 
@@ -128,7 +127,6 @@ const ShippingAddress = ({
         // saveDeliveryQuoteId(deliveryQuoteId, dspOption)
       }
     })
-    console.log("DELETED previous quote Id's")
   }
 
   const saveDeliveryQuoteId = async (
@@ -143,7 +141,6 @@ const ShippingAddress = ({
         cartId: cart?.id,
       }),
     })
-    console.log("INSERTED delivery quote id ")
   }
 
   const handleShippingMethod = async (
@@ -155,8 +152,6 @@ const ShippingAddress = ({
       .then(({ shipping_options }) => {
         return shipping_options[0]["id"]
       })
-    // Need to send back quoteID also
-    console.log("SHIPPING METHOD ID - ", shippingMethodId)
     await setShippingMethod(
       shippingMethodId !== undefined ? shippingMethodId : "None",
       deliveryFee,
@@ -171,7 +166,6 @@ const ShippingAddress = ({
     doordashResponse: any,
     uberResponse: any
   ) => {
-    console.log("HANDLING REQUEST")
     if (doordashResponse.status !== 200 && uberResponse.status !== 200) {
       setDspErrorMessage(doordashResponse.errorMessage)
       setInvalidAddress(true)
@@ -203,11 +197,10 @@ const ShippingAddress = ({
         external_delivery_id: uberResponse.quoteId,
       }
 
-      const deliveryFee: number = Math.min(
+      const deliveryFee: number = Math.max(
         doordash.deliveryFee,
         uber.deliveryFee
       )
-      console.log("SETTING - ", deliveryFee)
 
       // You'll be able to access the delivery quote id using this -> cart?.shipping_methods[0].data.quoteId
       let deliveryQuoteId: string = ""
@@ -219,9 +212,6 @@ const ShippingAddress = ({
         deliveryQuoteId = uber.external_delivery_id
         dspOption = "uber"
       }
-      //save delivery id in db by making fetch call with body as id
-      console.log("QUOTE ID - ", deliveryQuoteId)
-      console.log("dspOption - ", dspOption)
       await clearAndSaveQuoteId(deliveryQuoteId, dspOption)
       handleShippingMethod(deliveryFee, deliveryQuoteId)
     }
@@ -231,7 +221,6 @@ const ShippingAddress = ({
   // Needs better error checking and code cleanUp
   const getDeliveryQuote = async () => {
     try {
-      console.log(formData["shipping_address.address_1"])
       const doordashQuote = await fetch(
         "http://localhost:9000/doordash/deliveryQuote",
         {
@@ -255,20 +244,11 @@ const ShippingAddress = ({
         }),
       })
 
-      console.log("Doordash done")
       const doordashResponse = await doordashQuote.json()
-      // console.log("doordash - ", doordashResponse, doordashResponse.data.fee)
-
-      // Layo - need to send actual delivery paramets to Uber request
-
-      console.log("Uber done")
       const uberResponse = await UberQuote.json()
-      // console.log("uber - ", uberResponse, uberResponse.data.fee)
 
       handleDeliveryQuoteResponse(doordashResponse, uberResponse)
-    } catch (error) {
-      console.log(error)
-    }
+    } catch (error) {}
   }
 
   return (

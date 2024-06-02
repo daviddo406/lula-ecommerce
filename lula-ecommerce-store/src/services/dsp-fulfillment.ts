@@ -27,7 +27,6 @@ class DspFulfillmentService extends AbstractFulfillmentService {
     data: Record<string, unknown>,
     cart: Cart
   ): Promise<Record<string, unknown>> {
-    console.log("Validate");
     return {
       quoteId: data.quoteId,
       price: data.price,

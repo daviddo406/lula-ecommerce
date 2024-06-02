@@ -13,18 +13,12 @@ interface ServerResponse {
 }
 
 function handleResponse(responseData): string {
-  console.log(responseData);
-  console.log("-------------------------------");
   var errorMsg = "";
-  console.log("\n\n");
-  console.log(responseData.fieldErrors);
-  console.log("\n\n");
 
   if (responseData.fieldErrors) {
     var field_errors = responseData.fieldErrors;
     field_errors.forEach((error) => {
       errorMsg += `${error.error}\n`;
-      // console.log(`Field: ${error.field}, Error: ${error.error}`);
     });
     return errorMsg;
   }
@@ -48,25 +42,14 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   client
     .deliveryQuote(req.body)
     .then((response: DoorDashResponse<DeliveryResponse>) => {
-      // // do something
-      // if (response.status !== 200) {
-      //   throw Error(response.message);
-      // }
-      console.log("Delivery Fee - ", response.data.fee);
-      console.log("Delivery Status - ", response.status);
       res.json({
         status: response.status,
         // status: 400,
         fee: response.data.fee,
         quoteId: response.data.external_delivery_id,
       });
-      // console.log(response);
-      // res.json(response);
     })
     .catch((err: any) => {
-      console.log("\n\n");
-      console.log(err);
-      console.log("\n\n");
       res.json({
         status: 400,
         errorMessage: handleResponse(err),

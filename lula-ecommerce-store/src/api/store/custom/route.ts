@@ -19,18 +19,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     signing_secret: String(process.env.SIGNING_SECRET),
   });
 
-  console.log(req.body);
-
   client
     .deliveryQuote(req.body)
     .then((response: DoorDashResponse<DeliveryResponse>) => {
-      // do something
-      console.log("Delivery Fee - ", response.data.fee);
       res.json({ deliveryFee: response.data.fee });
     })
-    .catch((err: any) => {
-      // handle error
-      console.log(err);
-    });
+    .catch((err: any) => {});
 }
 // https://openapi.doordash.com/drive/v2/quotes
