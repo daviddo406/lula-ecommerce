@@ -13,7 +13,6 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   axios
     .post(url, quoteReqData, headers)
     .then((quoteResData) => {
-      console.log(quoteResData.data);
       res.json({
         status: quoteResData.status,
         // status: 400,
@@ -23,7 +22,6 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       // res.json({ test: "hi" });
     })
     .catch((error) => {
-      console.log(error);
       res.json({
         status: 400,
       });

@@ -52,7 +52,6 @@ const createDoordashDelivery = async (
   tip: number,
   cart: Omit<Cart, "refundable_amount" | "refunded_total">
 ) => {
-  console.log("MAKING Doordash CALL")
   const external_delivery_id = uuidv4()
   const doorDashDelivery = await fetch(
     "http://localhost:9000/doordash/createDelivery/",
@@ -88,7 +87,6 @@ const createDoordashDelivery = async (
       return res.json()
     })
     .then((data) => {
-      console.log("Doordash DATA - ", data)
       return data
     })
   await fetch("http://localhost:9000/delivery/updateDeliveryRecord", {
@@ -105,7 +103,6 @@ const createUberDelivery = async (
   tip: number,
   cart: Omit<Cart, "refundable_amount" | "refunded_total">
 ) => {
-  console.log("MAKING UBER CALL")
   const uberDelivery = await fetch(
     "http://localhost:9000/uber/delivery/create",
     {
@@ -144,7 +141,6 @@ const createUberDelivery = async (
       return res.json()
     })
     .then((data) => {
-      console.log("UBER DATA - ", data)
       return data
     })
   await fetch("http://localhost:9000/delivery/updateDeliveryRecord", {
@@ -161,7 +157,6 @@ const completeDelivery = async (
 ) => {
   const tipAmount = cart.items.find((item) => item.title === "Tip")?.unit_price
   const tip = tipAmount !== undefined ? tipAmount : 0
-  console.log("GETTING QUOTE ID")
   const deliveryIdEndpoint: string =
     "http://localhost:9000/delivery/deliveryQuoteId"
   const params = new URLSearchParams({
@@ -182,11 +177,6 @@ const completeDelivery = async (
     .then((data) => {
       // throw new Error("Doordash not working")
       if (data.result.length > 0) {
-        console.log(
-          "TESTTT - ",
-          data.result[0].dspOption,
-          data.result[0].deliveryQuoteId
-        )
         // if doordash
         if (data.result[0].dspOption == "doordash") {
           createDoordashDelivery(
@@ -201,7 +191,6 @@ const completeDelivery = async (
         }
         // if uber
         if (data.result[0].dspOption === "uber") {
-          console.log("UBER")
           createUberDelivery(data.result[0].deliveryQuoteId, tip, cart).catch(
             () => {
               throw new Error(
@@ -219,7 +208,6 @@ const completeDelivery = async (
       ) {
         throw error
       } else {
-        console.log(error.message)
         throw new Error(
           "Unable to place order. Please try again or contact support"
         )

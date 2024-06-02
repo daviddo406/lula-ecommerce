@@ -15,12 +15,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   client
     .createDelivery(req.body)
     .then((response: DoorDashResponse<DeliveryResponse>) => {
-      console.log("Tracking URL - ", response.data.tracking_url);
       res.json({ id: response.data.external_delivery_id });
     })
     .catch((err: any) => {
       // handle error
-      console.log(err);
     });
 }
 // https://openapi.doordash.com/drive/v2/quotes

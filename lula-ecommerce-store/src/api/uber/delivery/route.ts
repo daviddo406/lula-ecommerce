@@ -10,12 +10,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     },
   };
 
-  axios.get(url, headers)
-    .then(response => {
-      console.log(response.data);
+  axios
+    .get(url, headers)
+    .then((response) => {
       res.json(response.data);
     })
-    .catch((error) => {
-      console.log(error);
-    })
+    .catch((error) => {});
 }
