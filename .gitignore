@@ -5,7 +5,9 @@ lula-ecommerce-store/.env
 lula-ecommerce-store/.env
 lula-ecommerce-store-storefront/yarn.lock
 lula-ecommerce-store/meilisearch
+/node_modules
 __pycache__
 .DS_Store
 data.ms
 meilisearch
+

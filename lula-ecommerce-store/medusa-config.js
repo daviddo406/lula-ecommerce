@@ -32,13 +32,44 @@ const ADMIN_CORS = "http://localhost:9000,http://localhost:8000,http://localhost
 const STORE_CORS = process.env.STORE_CORS || "http://localhost:8000";
 
 const DATABASE_URL =
-  process.env.DATABASE_URL || "postgres://localhost/medusa-starter-default";
+  process.env.DATABASE_URL ||
+  "postgres://postgres:${process.env.DB_PASSWORD}@localhost/medusa-starter-default";
 
 const REDIS_URL = process.env.REDIS_URL || "redis://localhost:6379";
 
 const plugins = [
   `medusa-fulfillment-manual`,
   `medusa-payment-manual`,
+  {
+    resolve: `medusa-payment-stripe`,
+    options: {
+      api_key: process.env.STRIPE_API_KEY,
+      webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
+      capture: true,
+    },
+  },
+  {
+    resolve: `medusa-plugin-twilio-sms`,
+    options: {
+      account_sid: process.env.TWILIO_SMS_ACCOUNT_SID,
+      auth_token: process.env.TWILIO_SMS_AUTH_TOKEN,
+      from_number: process.env.TWILIO_SMS_FROM_NUMBER,
+    },
+  },
+  {
+    resolve: `medusa-plugin-sendgrid-typescript`,
+    options: {
+      api_key: process.env.SENDGRID_API_KEY,
+      from: process.env.SENDGRID_FROM,
+      order_placed_template: process.env.SENDGRID_ORDER_PLACED_ID,
+      localization: {
+        "de-DE": {
+          // locale key
+          order_placed_template: process.env.SENDGRID_ORDER_PLACED_ID_LOCALIZED,
+        },
+      },
+    },
+  },
   {
     resolve: `@medusajs/file-local`,
     options: {
@@ -56,6 +87,15 @@ const plugins = [
     },
   },
   {
+    resolve: `medusa-payment-paypal`,
+    options: {
+      sandbox: process.env.PAYPAL_SANDBOX,
+      clientId: process.env.PAYPAL_CLIENT_ID,
+      clientSecret: process.env.PAYPAL_CLIENT_SECRET,
+      authWebhookId: process.env.PAYPAL_AUTH_WEBHOOK_ID,
+    },
+  },
+  {
     resolve: `medusa-plugin-meilisearch`,
     options: {
       // config object passed when creating an instance
@@ -67,27 +107,21 @@ const plugins = [
       settings: {
         products: {
           indexSettings: {
-            "searchableAttributes": [
+            searchableAttributes: ["title", "description", "variant_sku"],
+            displayedAttributes: [
+              "id",
               "title",
               "description",
               "variant_sku",
-            ],
-            "displayedAttributes": [
-              "id", 
-              "title", 
-              "description", 
-              "variant_sku", 
-              "thumbnail", 
+              "thumbnail",
               "handle",
             ],
           },
           primaryKey: "id",
         },
-  
       },
     },
   },
-
 ];
 
 const modules = {

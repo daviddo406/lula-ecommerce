@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "medusa-plugin-meilisearch": "^2.0.10",
+    "react-router-dom": "^6.23.1",
+    "twilio": "^5.0.4"
+  },
+  "devDependencies": {
+    "@types/twilio": "^3.19.3"
+  }
+}

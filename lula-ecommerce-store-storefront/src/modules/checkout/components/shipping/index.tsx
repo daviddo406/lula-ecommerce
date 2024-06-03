@@ -44,7 +44,12 @@ const Shipping: React.FC<ShippingProps> = ({
 
   const set = async (id: string) => {
     setIsLoading(true)
-    await setShippingMethod(id)
+    // --------- Layo Edit ---------------
+    // Changed the below function to take in delivery fee
+    // This component is not currently being used so i'm passing in 0 to prevent an error
+    // ask me or test befor running this component
+    //  await setShippingMethod(id)
+    await setShippingMethod(id, 0, "")
       .then(() => {
         setIsLoading(false)
       })

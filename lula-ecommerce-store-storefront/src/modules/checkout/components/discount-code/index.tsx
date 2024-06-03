@@ -22,7 +22,7 @@ type DiscountCodeProps = {
 }
 
 const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
-  const [isOpen, setIsOpen] = React.useState(false)
+  const [isOpen, setIsOpen] = React.useState(true)
 
   const { discounts, gift_cards, region } = cart
 
@@ -114,13 +114,13 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
         ) : (
           <form action={formAction} className="w-full">
             <Label className="flex gap-x-1 my-2 items-center">
-              <button
+              {/* <button
                 onClick={() => setIsOpen(!isOpen)}
                 type="button"
                 className="txt-medium text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
               >
                 Add gift card or discount code
-              </button>
+              </button> */}
               <Tooltip content="You can add multiple gift cards, but only one discount code.">
                 <InformationCircleSolid color="var(--fg-muted)" />
               </Tooltip>
@@ -128,8 +128,9 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
             {isOpen && (
               <>
                 <div className="flex w-full gap-x-2 items-center">
+                  {/* label="Please enter dicount code" */}
                   <Input
-                    label="Please enter code"
+                    label="Please enter dicount code"
                     name="code"
                     type="text"
                     autoFocus={false}
