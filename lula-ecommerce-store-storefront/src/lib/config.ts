@@ -10,4 +10,5 @@ if (process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL) {
 export const medusaClient = new Medusa({
   baseUrl: MEDUSA_BACKEND_URL,
   maxRetries: 3,
+  publishableApiKey: process.env.NEXT_PUBLIC_SALES_CHANNEL_POOL
 })

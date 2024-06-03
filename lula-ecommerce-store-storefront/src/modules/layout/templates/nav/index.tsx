@@ -1,18 +1,40 @@
-
 import { cookies } from "next/headers"
 import Link from "next/link"
 import { Suspense } from "react";
-
+import dynamic from 'next/dynamic';
+import { emitter } from "../../../../utils/emitter"
 
 import { listRegions } from "@lib/data"
 import CartButton from "@modules/layout/components/cart-button"
 import SideMenu from "@modules/layout/components/side-menu"
 import DeliveryToggle from "@modules/layout/components/delivery-toggle/deliveryToggle.client"
+import PopupWithAddressForm from '@modules/layout/components/delivery-address-input/popup_with_address_form';
+
+const SalesChannelSwitcher = dynamic(
+  () => import('@modules/layout/components/store-location-switch/sales_channel_switch'),
+  { 
+    ssr: false,
+    // Add a loading component or function here if needed for better UX
+    loading: () => <p>Loading...</p>
+  }
+);
+
+const ClientAddressDisplay = dynamic(() => import('../../components/delivery-address-input/ClientAddressDisplay'), { ssr: false });
+
+
+interface Address {
+  street?: string;
+  city: string;
+  state: string;
+  zip?: string;
+}
 
 export default async function Nav() {
   const regions = await listRegions().then((regions) => regions)
   const regionCookie = cookies().get("_medusa_region")?.value
   const currentRegion = regionCookie && JSON.parse(regionCookie)
+
+
 
 
   return (
@@ -24,37 +46,39 @@ export default async function Nav() {
               <SideMenu regions={regions} currentRegion={currentRegion} />
             </div>
             <DeliveryToggle />
+            <PopupWithAddressForm />
+            <ClientAddressDisplay />
           </div>
-
+          
+          
 
           <div className="flex items-center h-full">
             <Link
               href="/"
               className="txt-compact-xlarge-plus hover:text-ui-fg-base uppercase"
             >
-              Test Store
+              <img src="/WawaEmblem.png" alt="Store Logo" style={{ maxWidth: '120px' }} />
+              
             </Link>
           </div>
 
+          
+          
+        
+
+          
+
           <div className="flex items-center gap-x-6 h-full flex-1 basis-0 justify-end">
+            <SalesChannelSwitcher />
             <div className="hidden small:flex items-center gap-x-6 h-full">
               {process.env.FEATURE_SEARCH_ENABLED && (
                 // Update the form to use a direct submission approach
-                <form action="/search" method="get" className="flex items-center">
-                  <input
-                    type="text"
-                    name="q" // The query parameter name expected by your search page
-                    placeholder="Search... for your favorite snacks"
-                    style={{
-                      width: '300px', // Increase width as per your design requirements
-                      height: '40px', // Increase height to make the bar taller
-                      padding: '10px', // Add padding inside the search bar
-                      fontSize: '16px', // Increase font size if necessary
-                      borderRadius: '4px', // Add rounded corners to the search bar
-                      border: '1px solid #e5e5e5', // Add a border to the search bar
-                    }}
-                    className="input-class"
-                  />
+                <Link
+                  className="hover:text-ui-fg-base"
+                  href="/search"
+                  scroll={false}
+                >
+                  
                   <button 
                   type="submit" 
                   style={{
@@ -69,8 +93,10 @@ export default async function Nav() {
                   }}
                   aria-label="Search" // Accessibility for screen readers
                   >
-</button>
-                </form>
+                  </button>
+                </Link>
+                
+                
               )}
               <Link className="hover:text-ui-fg-base" href="/account">
                 Account

@@ -211,6 +211,59 @@ Click on Add Channels, and select the Default Medusa Sales Channel for the Produ
 
 *The product will now be visible/available on the website*
 
+### Set NEXT_PUBLIC_SALES_CHANNEL_POOL Variable in .env.local (Get Publishable Api Key from Admin Dashboard -> Settings -> API Key Management)
+```
+NEXT_PUBLIC_SALES_CHANNEL_POOL="publishable_api_key_here"
+```
+
+### Set MEDUSA_ADMIN_BACKEND_URL in .env (IMPORTANT FOR STORE LOCATION SWITCHING TO WORK)
+```
+MEDUSA_ADMIN_BACKEND_URL=http://localhost:9000
+```
+
+### YOU CAN CREATE A FEW SALES CHANNELS FROM THE MEDUSA ADMIN DASHBOARD
+
+1) From the admin dashboard, go to settings, then Sales Channels. Next, click on the '+' symbol to add a sales channel.
+
+2) Enter the title (Ex: Wawa - 3604 Chestnut St) and Description (Ex: 3604 Chestnut St, Philadelphia, PA 19104).
+
+3) Click on "publish channel".
+
+4) You can then add products to the sales channel on the right hand side.
+
+
+### Binding a Sales Channel to the Publishable API Key
+
+1) From the admin dashboard, go to settings, then API Key Management.
+
+2) Beside the API Key, there are 3 dots on the rightmost side, click on it and hit "Edit sales channels"
+
+3) You can remove by ticking the box next to the sales channel listed, or add a channel by clicking "Add channels" and selecting one to add.
+
+Note: Currently, it is recommended to only bind one sales channel per api key at a time.
+
+
+
+
+### You will need to install tiny-emitter package in order for Legal Restrictions to work properly
+
+Just ctrl+c the frontend and run:
+
+```
+cd lula-ecommerce-store-storefront
+npm install tiny-emitter
+```
+
+
+### You may need to install react-select package if you receive any errors regarding react-select package missing
+
+Just ctrl+c the frontend and run:
+
+```
+cd lula-ecommerce-store-storefront
+npm install react-select
+```
+
 
 ### Starting Next.js Storefront
 ```
@@ -262,4 +315,5 @@ images: {
         hostname: "medusa-server-testing.s3.us-east-1.amazonaws.com",
       },
 ```
+
 

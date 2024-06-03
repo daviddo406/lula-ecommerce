@@ -4,6 +4,16 @@ import Link from "next/link"
 import { getCategoriesList, getCollectionsList } from "@lib/data"
 
 import MedusaCTA from "../../components/medusa-cta"
+import dynamic from 'next/dynamic';
+
+const StoreInfoDisplay = dynamic(
+  () => import('@modules/layout/components/store-information/store-info-display'),
+  { 
+    ssr: false,
+    // Add a loading component or function here if needed for better UX
+    loading: () => <p>Loading...</p>
+  }
+);
 
 const fetchCollections = async () => {
   const { collections } = await getCollectionsList()
@@ -17,7 +27,7 @@ const fetchCategories = async () => {
 
 export default async function Footer() {
   const productCollections = await fetchCollections().then(
-    (collections) => collections
+    (collections) => collections.filter(x => x.metadata["sales-key"] == process.env.NEXT_PUBLIC_SALES_CHANNEL_POOL)
   )
   const productCategories = await fetchCategories().then(
     (categories) => categories
@@ -31,9 +41,10 @@ export default async function Footer() {
               href="/"
               className="txt-compact-xlarge-plus text-ui-fg-subtle hover:text-ui-fg-base uppercase"
             >
-              Test Store
+              <img src="/WawaEmblem.png" alt="Store Logo" style={{ maxWidth: '120px' }} />
             </Link>
           </div>
+          <div className="flex flex-col items-center"><StoreInfoDisplay /></div>
           <div className="text-small-regular gap-10 md:gap-x-16 grid grid-cols-2 sm:grid-cols-3">
             {productCategories && productCategories?.length > 0 && (
               <div className="flex flex-col gap-y-2">
@@ -101,7 +112,7 @@ export default async function Footer() {
                     }
                   )}
                 >
-                  {productCollections?.slice(0, 6).map((c) => (
+                  {productCollections?.slice(0, 10).map((c) => (
                     <li key={c.id}>
                       <Link
                         className="hover:text-ui-fg-base"
